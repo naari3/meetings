@@ -8,6 +8,20 @@ export function gcalPlugin(): Plugin {
     name: 'vite-plugin-gcal',
     
     async buildStart() {
+      // In development, check if files already exist to avoid unnecessary API calls
+      if (process.env.NODE_ENV === 'development') {
+        const fs = await import('fs');
+        const path = await import('path');
+        
+        const eventsPath = path.join(process.cwd(), 'public', 'events.json');
+        const icsPath = path.join(process.cwd(), 'dist', 'availability.ics');
+        
+        if (fs.existsSync(eventsPath)) {
+          console.log('📋 Using existing events.json (development mode)');
+          return;
+        }
+      }
+      
       console.log('🔄 Fetching Google Calendar events...');
       
       try {

@@ -3,6 +3,11 @@ output "workload_identity_provider" {
   value       = google_iam_workload_identity_pool_provider.github_provider.name
 }
 
+output "service_account_email" {
+  description = "Service account email for Calendar API access"
+  value       = google_service_account.calendar_sa.email
+}
+
 output "project_number" {
   description = "Google Cloud project number"
   value       = data.google_project.project.number
@@ -14,7 +19,7 @@ output "project_id" {
 }
 
 output "github_repository" {
-  description = "GitHub repository configured for Direct WIF"
+  description = "GitHub repository configured for WIF"
   value       = "naari3/naari3-meetings"
 }
 

@@ -72,12 +72,25 @@ resource "google_iam_workload_identity_pool_provider" "github_provider" {
   }
 }
 
-# Grant Calendar API access directly to the GitHub repository via principalSet
-# Using a more general role that includes Calendar API access
-resource "google_project_iam_member" "github_calendar_access" {
+# Create Service Account for Calendar Access
+resource "google_service_account" "calendar_sa" {
+  account_id   = "calendar-access-sa"
+  display_name = "Calendar Access Service Account"
+  description  = "Service account for Google Calendar API access from GitHub Actions"
+}
+
+# Grant Calendar API access to the service account
+resource "google_project_iam_member" "calendar_sa_viewer" {
   project = "naari3-calendar"
-  role    = "roles/editor"
-  member  = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github_actions_pool.name}/attribute.repository/naari3/naari3-meetings"
+  role    = "roles/viewer"
+  member  = "serviceAccount:${google_service_account.calendar_sa.email}"
+}
+
+# Allow the GitHub repository to impersonate the service account
+resource "google_service_account_iam_member" "github_sa_impersonation" {
+  service_account_id = google_service_account.calendar_sa.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github_actions_pool.name}/attribute.repository/naari3/naari3-meetings"
 }
 
 data "google_project" "project" {

@@ -1,6 +1,6 @@
-# Google Calendar Sync - 空き時間カレンダー
+# naari3-meetings - ミーティング空き時間カレンダー
 
-Google Calendar APIを使用して予定を取得し、美しいWebアプリケーションとICSファイルで表示するモダンなカレンダー同期システムです。
+naari3のGoogle Calendar APIを使用して予定を取得し、美しいWebアプリケーションとICSファイルで表示するモダンなカレンダー同期システムです。
 
 ## 🚀 概要
 
@@ -47,7 +47,7 @@ Google Calendar APIを使用して予定を取得し、美しいWebアプリケ�
 ## 📁 プロジェクト構成
 
 ```
-gcal-sync/
+naari3-meetings/
 ├── src/
 │   ├── components/           # Reactコンポーネント
 │   │   ├── CalendarGrid.tsx  # カレンダーグリッド表示

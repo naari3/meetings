@@ -1,7 +1,7 @@
 {
-  "name": "gcal-sync",
+  "name": "naari3-meetings",
   "version": "1.0.0",
-  "description": "Google Calendar availability calendar web app",
+  "description": "naari3's meeting availability calendar web app",
   "type": "module",
   "scripts": {
     "dev": "vite",

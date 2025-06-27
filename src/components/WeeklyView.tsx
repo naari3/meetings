@@ -4,9 +4,10 @@ interface WeeklyViewProps {
   events: CalendarEvent[]
   currentWeekOffset: number
   getFirstWeekWithEvents: (events: CalendarEvent[]) => Date
+  setCurrentWeekOffset: (callback: (prev: number) => number) => void
 }
 
-export default function WeeklyView({ events, currentWeekOffset, getFirstWeekWithEvents }: WeeklyViewProps) {
+export default function WeeklyView({ events, currentWeekOffset, getFirstWeekWithEvents, setCurrentWeekOffset }: WeeklyViewProps) {
   const firstWeekWithEvents = getFirstWeekWithEvents(events)
   const startOfWeek = new Date(firstWeekWithEvents)
   startOfWeek.setDate(firstWeekWithEvents.getDate() + (currentWeekOffset * 7))
@@ -58,6 +59,24 @@ export default function WeeklyView({ events, currentWeekOffset, getFirstWeekWith
             <h6 className="text-xl leading-8 font-semibold text-gray-900">
               {startOfWeek.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' })} - {new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', year: 'numeric' })}
             </h6>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentWeekOffset(prev => prev - 1)}
+              className="p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-200"
+            >
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setCurrentWeekOffset(prev => prev + 1)}
+              className="p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-200"
+            >
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
         </div>
         <div className="relative">

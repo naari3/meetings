@@ -74,17 +74,8 @@ function App() {
         {/* Stats Card */}
         <StatsCard events={events} />
 
-        {/* Week Navigation */}
-        <div className="flex justify-center items-center mb-8 gap-4">
-          <button
-            onClick={() => setCurrentWeekOffset(prev => prev - 1)}
-            className="p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-200"
-          >
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          
+        {/* View Toggle */}
+        <div className="flex justify-center mb-8">
           <div className="bg-white rounded-xl p-1 shadow-lg border border-gray-200 inline-flex">
             <button
               onClick={() => setView('weekly')}
@@ -107,15 +98,6 @@ function App() {
               日表示
             </button>
           </div>
-          
-          <button
-            onClick={() => setCurrentWeekOffset(prev => prev + 1)}
-            className="p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-200"
-          >
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
         </div>
 
         {/* Content */}
@@ -135,7 +117,7 @@ function App() {
           </div>
         ) : (
           <div className="space-y-8">
-            {view === 'weekly' && <WeeklyView events={events} currentWeekOffset={currentWeekOffset} getFirstWeekWithEvents={getFirstWeekWithEvents} />}
+            {view === 'weekly' && <WeeklyView events={events} currentWeekOffset={currentWeekOffset} getFirstWeekWithEvents={getFirstWeekWithEvents} setCurrentWeekOffset={setCurrentWeekOffset} />}
             {view === 'daily' && <DailyView events={events} />}
           </div>
         )}

@@ -1,15 +1,29 @@
 import { useState, useEffect } from 'react'
 import { CalendarEvent } from './types'
 import StatsCard from './components/StatsCard'
-import CalendarGrid from './components/CalendarGrid'
 import WeeklyView from './components/WeeklyView'
 import DailyView from './components/DailyView'
 
 function App() {
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [loading, setLoading] = useState(true)
-  const [view, setView] = useState<'monthly' | 'weekly' | 'daily'>('monthly')
+  const [view, setView] = useState<'weekly' | 'daily'>('weekly')
   const [generatedAt, setGeneratedAt] = useState<string>('')
+  const [currentWeekOffset, setCurrentWeekOffset] = useState(0)
+
+  // Get the first week with events
+  const getFirstWeekWithEvents = (events: CalendarEvent[]) => {
+    if (events.length === 0) return new Date()
+    
+    const eventDates = events.map(event => new Date(event.start))
+    const earliestDate = new Date(Math.min(...eventDates.map(d => d.getTime())))
+    
+    // Get the start of the week for the earliest event
+    const startOfWeek = new Date(earliestDate)
+    startOfWeek.setDate(earliestDate.getDate() - earliestDate.getDay())
+    
+    return startOfWeek
+  }
 
   useEffect(() => {
     // Load events data from events.json
@@ -60,19 +74,18 @@ function App() {
         {/* Stats Card */}
         <StatsCard events={events} />
 
-        {/* View Toggle */}
-        <div className="flex justify-center mb-8">
+        {/* Week Navigation */}
+        <div className="flex justify-center items-center mb-8 gap-4">
+          <button
+            onClick={() => setCurrentWeekOffset(prev => prev - 1)}
+            className="p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-200"
+          >
+            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          
           <div className="bg-white rounded-xl p-1 shadow-lg border border-gray-200 inline-flex">
-            <button
-              onClick={() => setView('monthly')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                view === 'monthly'
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              月表示
-            </button>
             <button
               onClick={() => setView('weekly')}
               className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
@@ -94,6 +107,15 @@ function App() {
               日表示
             </button>
           </div>
+          
+          <button
+            onClick={() => setCurrentWeekOffset(prev => prev + 1)}
+            className="p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-200"
+          >
+            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
 
         {/* Content */}
@@ -113,8 +135,7 @@ function App() {
           </div>
         ) : (
           <div className="space-y-8">
-            {view === 'monthly' && <CalendarGrid events={events} />}
-            {view === 'weekly' && <WeeklyView events={events} />}
+            {view === 'weekly' && <WeeklyView events={events} currentWeekOffset={currentWeekOffset} getFirstWeekWithEvents={getFirstWeekWithEvents} />}
             {view === 'daily' && <DailyView events={events} />}
           </div>
         )}

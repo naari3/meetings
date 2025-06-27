@@ -2,12 +2,16 @@ import { CalendarEvent } from '../types'
 
 interface WeeklyViewProps {
   events: CalendarEvent[]
+  currentWeekOffset: number
+  getFirstWeekWithEvents: (events: CalendarEvent[]) => Date
 }
 
-export default function WeeklyView({ events }: WeeklyViewProps) {
+export default function WeeklyView({ events, currentWeekOffset, getFirstWeekWithEvents }: WeeklyViewProps) {
+  const firstWeekWithEvents = getFirstWeekWithEvents(events)
+  const startOfWeek = new Date(firstWeekWithEvents)
+  startOfWeek.setDate(firstWeekWithEvents.getDate() + (currentWeekOffset * 7))
+  
   const currentDate = new Date()
-  const startOfWeek = new Date(currentDate)
-  startOfWeek.setDate(currentDate.getDate() - currentDate.getDay())
   
   const weekDays = Array.from({ length: 7 }, (_, i) => {
     const day = new Date(startOfWeek)
@@ -22,7 +26,7 @@ export default function WeeklyView({ events }: WeeklyViewProps) {
     })
   }
 
-  const timeSlots = Array.from({ length: 12 }, (_, i) => i + 7) // 7AM to 6PM
+  const timeSlots = Array.from({ length: 9 }, (_, i) => i + 10) // 10AM to 6PM
 
   const getEventColor = (index: number) => {
     const colors = [
@@ -52,7 +56,7 @@ export default function WeeklyView({ events }: WeeklyViewProps) {
               />
             </svg>
             <h6 className="text-xl leading-8 font-semibold text-gray-900">
-              Today, {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              {startOfWeek.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' })} - {new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', year: 'numeric' })}
             </h6>
           </div>
         </div>
@@ -84,7 +88,7 @@ export default function WeeklyView({ events }: WeeklyViewProps) {
                   const isToday = day.toDateString() === currentDate.toDateString()
                   const currentHour = new Date().getHours()
                   const currentMinutes = new Date().getMinutes()
-                  const showCurrentTimeLine = isToday && currentHour === hour && currentHour >= 7 && currentHour <= 18
+                  const showCurrentTimeLine = isToday && currentHour === hour && currentHour >= 10 && currentHour <= 18
                   
                   return (
                     <div
@@ -93,7 +97,7 @@ export default function WeeklyView({ events }: WeeklyViewProps) {
                     >
                       {showCurrentTimeLine && (
                         <div 
-                          className="absolute left-0 right-0 z-10 flex items-center"
+                          className="absolute left-0 right-0 z-30 flex items-center"
                           style={{
                             top: `${(currentMinutes / 60) * 100}%`
                           }}

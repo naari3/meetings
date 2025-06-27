@@ -57,46 +57,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Header */}
-        <header className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl mb-4 shadow-lg">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-3">
-            なありみーてぃんぐ
-          </h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            なあり仕事やっとるでよ
-          </p>
-        </header>
 
-        {/* View Toggle */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-white rounded-xl p-1 shadow-lg border border-gray-200 inline-flex">
-            <button
-              onClick={() => setView('weekly')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                view === 'weekly'
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              週表示
-            </button>
-            <button
-              onClick={() => setView('daily')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                view === 'daily'
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              日表示
-            </button>
-          </div>
-        </div>
 
         {/* Content */}
         {events.length === 0 ? (
@@ -114,14 +75,14 @@ function App() {
             </p>
           </div>
         ) : (
-          <div className="space-y-8">
-            {view === 'weekly' && <WeeklyView events={events} currentWeekOffset={currentWeekOffset} getFirstWeekWithEvents={getFirstWeekWithEvents} setCurrentWeekOffset={setCurrentWeekOffset} />}
-            {view === 'daily' && <DailyView events={events} currentDayOffset={currentDayOffset} setCurrentDayOffset={setCurrentDayOffset} />}
+          <div className="space-y-12">
+            {view === 'weekly' && <WeeklyView events={events} currentWeekOffset={currentWeekOffset} getFirstWeekWithEvents={getFirstWeekWithEvents} setCurrentWeekOffset={setCurrentWeekOffset} view={view} setView={setView} />}
+            {view === 'daily' && <DailyView events={events} currentDayOffset={currentDayOffset} setCurrentDayOffset={setCurrentDayOffset} view={view} setView={setView} />}
+            
+            {/* Stats Card */}
+            <StatsCard events={events} />
           </div>
         )}
-
-        {/* Stats Card */}
-        <StatsCard events={events} />
 
         {/* Footer */}
         <footer className="text-center mt-12">

@@ -1,12 +1,16 @@
 import { CalendarEvent } from '../types'
+import Button from './Button'
+import ViewToggle from './ViewToggle'
 
 interface DailyViewProps {
   events: CalendarEvent[]
   currentDayOffset: number
   setCurrentDayOffset: (callback: (prev: number) => number) => void
+  view: 'weekly' | 'daily'
+  setView: (view: 'weekly' | 'daily') => void
 }
 
-export default function DailyView({ events, currentDayOffset, setCurrentDayOffset }: DailyViewProps) {
+export default function DailyView({ events, currentDayOffset, setCurrentDayOffset, view, setView }: DailyViewProps) {
   const baseDate = new Date()
   const currentDate = new Date(baseDate)
   currentDate.setDate(baseDate.getDate() + currentDayOffset)
@@ -38,7 +42,7 @@ export default function DailyView({ events, currentDayOffset, setCurrentDayOffse
   }
 
   return (
-    <section className="relative bg-stone-50 py-24">
+    <section className="relative bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200 py-8">
       <div className="w-full max-w-7xl mx-auto px-6 lg:px-8 overflow-x-auto">
         <div className="flex flex-col md:flex-row max-md:gap-3 items-center justify-between mb-5">
           <div className="flex items-center gap-4">
@@ -58,23 +62,27 @@ export default function DailyView({ events, currentDayOffset, setCurrentDayOffse
               {currentDate.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
             </h6>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentDayOffset(prev => prev - 1)}
-              className="p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-200"
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <button
-              onClick={() => setCurrentDayOffset(prev => prev + 1)}
-              className="p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-200"
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+          <div className="flex items-center gap-4">
+            <ViewToggle view={view} setView={setView} />
+            
+            <div className="flex items-center gap-2">
+              <Button
+                variant="navigation"
+                onClick={() => setCurrentDayOffset(prev => prev - 1)}
+              >
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </Button>
+              <Button
+                variant="navigation"
+                onClick={() => setCurrentDayOffset(prev => prev + 1)}
+              >
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Button>
+            </div>
           </div>
         </div>
         <div className="relative">
@@ -83,7 +91,7 @@ export default function DailyView({ events, currentDayOffset, setCurrentDayOffse
               {timeSlots.map((hour) => (
                 <div
                   key={hour}
-                  className="h-20 border-b border-r border-gray-200 relative"
+                  className="h-16 lg:h-14 border-b border-r border-gray-200 relative"
                 >
                   <span className="absolute -left-12 top-0 -mt-2 text-xs font-medium text-gray-500 whitespace-nowrap z-10">
                     {`${String(hour).padStart(2, '0')}:00`}
@@ -96,7 +104,7 @@ export default function DailyView({ events, currentDayOffset, setCurrentDayOffse
               {/* Background grid */}
               <div className="flex flex-col">
                 {timeSlots.map((hour) => (
-                  <div key={hour} className="w-full h-20 border-b border-gray-200" />
+                  <div key={hour} className="w-full h-16 lg:h-14 border-b border-gray-200" />
                 ))}
               </div>
               
@@ -190,7 +198,7 @@ export default function DailyView({ events, currentDayOffset, setCurrentDayOffse
                   return (
                     <div
                       key={eventIndex}
-                      className={`absolute rounded p-1.5 border-l-2 ${color.bg} ${color.border} z-20`}
+                      className={`absolute rounded pl-1.5 py-1.5 pr-0 border-l-2 ${color.bg} ${color.border} z-20`}
                       style={{
                         top: `${topPercent}%`,
                         height: `${Math.max(heightPercent, 5)}%`,
@@ -203,13 +211,35 @@ export default function DailyView({ events, currentDayOffset, setCurrentDayOffse
                       data-debug-event-start={event.start}
                       data-debug-event-summary={event.summary}
                     >
-                      <p className="text-xs font-normal text-gray-900 mb-px truncate">
-                        {event.summary}
-                      </p>
-                      <p className={`text-xs font-semibold ${color.text} truncate`}>
-                        {eventStart.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} - 
-                        {eventEnd.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
-                      </p>
+                      {(() => {
+                        const durationMinutes = (eventEnd.getTime() - eventStart.getTime()) / (1000 * 60);
+                        const timeString = `${eventStart.toLocaleTimeString("ja-JP", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })} - ${eventEnd.toLocaleTimeString("ja-JP", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}`;
+                        
+                        if (durationMinutes <= 30) {
+                          return (
+                            <p className="text-xs font-normal text-gray-900 whitespace-nowrap overflow-hidden">
+                              {event.summary} <span className={`font-semibold ${color.text}`}>{timeString}</span>
+                            </p>
+                          );
+                        } else {
+                          return (
+                            <>
+                              <p className="text-xs font-normal text-gray-900 mb-px whitespace-nowrap overflow-hidden">
+                                {event.summary}
+                              </p>
+                              <p className={`text-xs font-semibold ${color.text} whitespace-nowrap overflow-hidden`}>
+                                {timeString}
+                              </p>
+                            </>
+                          );
+                        }
+                      })()}
                     </div>
                   )
                 })

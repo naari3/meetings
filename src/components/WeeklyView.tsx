@@ -1,10 +1,14 @@
 import { CalendarEvent } from "../types";
+import Button from "./Button";
+import ViewToggle from "./ViewToggle";
 
 interface WeeklyViewProps {
   events: CalendarEvent[];
   currentWeekOffset: number;
   getFirstWeekWithEvents: (events: CalendarEvent[]) => Date;
   setCurrentWeekOffset: (callback: (prev: number) => number) => void;
+  view: 'weekly' | 'daily';
+  setView: (view: 'weekly' | 'daily') => void;
 }
 
 export default function WeeklyView({
@@ -12,6 +16,8 @@ export default function WeeklyView({
   currentWeekOffset,
   getFirstWeekWithEvents,
   setCurrentWeekOffset,
+  view,
+  setView,
 }: WeeklyViewProps) {
   const firstWeekWithEvents = getFirstWeekWithEvents(events);
   const startOfWeek = new Date(firstWeekWithEvents);
@@ -40,32 +46,28 @@ export default function WeeklyView({
         bg: "bg-purple-50",
         border: "border-purple-600",
         text: "text-purple-600",
-        fade: "from-purple-50",
       },
       { 
         bg: "bg-green-50", 
         border: "border-green-600", 
         text: "text-green-600",
-        fade: "from-green-50",
       },
       { 
         bg: "bg-blue-50", 
         border: "border-blue-600", 
         text: "text-blue-600",
-        fade: "from-blue-50",
       },
       {
         bg: "bg-yellow-50",
         border: "border-yellow-600",
         text: "text-yellow-600",
-        fade: "from-yellow-50",
       },
     ];
     return colors[index % colors.length];
   };
 
   return (
-    <section className="relative bg-stone-50 py-24">
+    <section className="relative bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200 py-8">
       <div className="w-full max-w-7xl mx-auto px-6 lg:px-8 overflow-x-auto">
         <div className="flex flex-col md:flex-row max-md:gap-3 items-center justify-between mb-5">
           <div className="flex items-center gap-4">
@@ -104,48 +106,52 @@ export default function WeeklyView({
               })()}
             </h6>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentWeekOffset((prev) => prev - 1)}
-              className="p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-200"
-            >
-              <svg
-                className="w-5 h-5 text-gray-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          <div className="flex items-center gap-4">
+            <ViewToggle view={view} setView={setView} />
+            
+            <div className="flex items-center gap-2">
+              <Button
+                variant="navigation"
+                onClick={() => setCurrentWeekOffset((prev) => prev - 1)}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-            <button
-              onClick={() => setCurrentWeekOffset((prev) => prev + 1)}
-              className="p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-200"
-            >
-              <svg
-                className="w-5 h-5 text-gray-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+                <svg
+                  className="w-5 h-5 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </Button>
+              <Button
+                variant="navigation"
+                onClick={() => setCurrentWeekOffset((prev) => prev + 1)}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
+                <svg
+                  className="w-5 h-5 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </Button>
+            </div>
           </div>
         </div>
         <div className="relative flex overflow-x-auto">
           {/* Time column */}
-          <div className="flex flex-col sticky left-0 bg-stone-50 z-10">
+          <div className="flex flex-col sticky left-0 z-10">
             {/* Header spacer */}
             <div className="px-2 py-3.5 flex flex-col items-center justify-center text-sm font-medium text-gray-900">
               <div className="text-xs font-medium mb-1 invisible">月</div>
@@ -167,7 +173,7 @@ export default function WeeklyView({
           {/* Calendar section */}
           <div className="flex-1 min-w-0">
             {/* Header */}
-            <div className="grid sticky top-0 bg-stone-50 z-5" style={{gridTemplateColumns: '1rem 1fr 1fr 1fr 1fr 1fr 1fr 1fr'}}>
+            <div className="grid sticky top-0 z-5" style={{gridTemplateColumns: '1rem 1fr 1fr 1fr 1fr 1fr 1fr 1fr'}}>
               {/* Left border column */}
               <div className="w-4 border-r border-gray-200"></div>
               {weekDays.map((day, index) => (
@@ -175,7 +181,7 @@ export default function WeeklyView({
                   key={index}
                   className={`p-3.5 flex flex-col items-center justify-center ${
                     day.toDateString() === currentDate.toDateString()
-                      ? "text-indigo-600"
+                      ? "text-indigo-700 bg-indigo-50 rounded-lg"
                       : "text-gray-900"
                   }`}
                 >
@@ -230,7 +236,7 @@ export default function WeeklyView({
                     {timeSlots.map((hour) => (
                       <div
                         key={hour}
-                        className={`h-16 lg:h-14 p-0.5 md:p-3.5 border-t border-gray-200 transition-all hover:bg-stone-100 relative ${dayIndex < 6 ? 'border-r' : ''}`}
+                        className={`h-16 lg:h-14 p-0.5 md:p-3.5 border-t border-gray-200 relative ${dayIndex < 6 ? 'border-r' : ''}`}
                       >
                       </div>
                     ))}
@@ -349,7 +355,7 @@ export default function WeeklyView({
                       return (
                         <div
                           key={eventIndex}
-                          className={`absolute rounded p-1.5 border-l-2 ${color.bg} ${color.border} z-20`}
+                          className={`absolute rounded pl-1.5 py-1.5 pr-0 border-l-2 ${color.bg} ${color.border} z-20`}
                           style={{
                             top: `${topPercent}%`,
                             height: `${Math.max(heightPercent, 5)}%`,
@@ -374,23 +380,18 @@ export default function WeeklyView({
                             
                             if (durationMinutes <= 30) {
                               return (
-                                <p className="text-xs font-normal text-gray-900 overflow-hidden relative">
-                                  <span className="block whitespace-nowrap">
-                                    {event.summary} <span className={`font-semibold ${color.text}`}>{timeString}</span>
-                                  </span>
-                                  <div className={`absolute top-0 right-0 w-4 h-full bg-gradient-to-l ${color.fade} to-transparent pointer-events-none`}></div>
+                                <p className="text-xs font-normal text-gray-900 whitespace-nowrap overflow-hidden">
+                                  {event.summary} <span className={`font-semibold ${color.text}`}>{timeString}</span>
                                 </p>
                               );
                             } else {
                               return (
                                 <>
-                                  <p className="text-xs font-normal text-gray-900 mb-px overflow-hidden relative">
-                                    <span className="block whitespace-nowrap">{event.summary}</span>
-                                    <div className={`absolute top-0 right-0 w-4 h-full bg-gradient-to-l ${color.fade} to-transparent pointer-events-none`}></div>
+                                  <p className="text-xs font-normal text-gray-900 mb-px whitespace-nowrap overflow-hidden">
+                                    {event.summary}
                                   </p>
-                                  <p className={`text-xs font-semibold ${color.text} overflow-hidden relative`}>
-                                    <span className="block whitespace-nowrap">{timeString}</span>
-                                    <div className={`absolute top-0 right-0 w-4 h-full bg-gradient-to-l ${color.fade} to-transparent pointer-events-none`}></div>
+                                  <p className={`text-xs font-semibold ${color.text} whitespace-nowrap overflow-hidden`}>
+                                    {timeString}
                                   </p>
                                 </>
                               );

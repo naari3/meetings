@@ -1,43 +1,56 @@
-import { CalendarEvent } from '../types'
+import { CalendarEvent } from "../types";
 
 interface WeeklyViewProps {
-  events: CalendarEvent[]
-  currentWeekOffset: number
-  getFirstWeekWithEvents: (events: CalendarEvent[]) => Date
-  setCurrentWeekOffset: (callback: (prev: number) => number) => void
+  events: CalendarEvent[];
+  currentWeekOffset: number;
+  getFirstWeekWithEvents: (events: CalendarEvent[]) => Date;
+  setCurrentWeekOffset: (callback: (prev: number) => number) => void;
 }
 
-export default function WeeklyView({ events, currentWeekOffset, getFirstWeekWithEvents, setCurrentWeekOffset }: WeeklyViewProps) {
-  const firstWeekWithEvents = getFirstWeekWithEvents(events)
-  const startOfWeek = new Date(firstWeekWithEvents)
-  startOfWeek.setDate(firstWeekWithEvents.getDate() + (currentWeekOffset * 7))
-  
-  const currentDate = new Date()
-  
+export default function WeeklyView({
+  events,
+  currentWeekOffset,
+  getFirstWeekWithEvents,
+  setCurrentWeekOffset,
+}: WeeklyViewProps) {
+  const firstWeekWithEvents = getFirstWeekWithEvents(events);
+  const startOfWeek = new Date(firstWeekWithEvents);
+  startOfWeek.setDate(firstWeekWithEvents.getDate() + currentWeekOffset * 7);
+
+  const currentDate = new Date();
+
   const weekDays = Array.from({ length: 7 }, (_, i) => {
-    const day = new Date(startOfWeek)
-    day.setDate(startOfWeek.getDate() + i)
-    return day
-  })
+    const day = new Date(startOfWeek);
+    day.setDate(startOfWeek.getDate() + i);
+    return day;
+  });
 
   const getEventsForDay = (date: Date) => {
-    return events.filter(event => {
-      const eventDate = new Date(event.start)
-      return eventDate.toDateString() === date.toDateString()
-    })
-  }
+    return events.filter((event) => {
+      const eventDate = new Date(event.start);
+      return eventDate.toDateString() === date.toDateString();
+    });
+  };
 
-  const timeSlots = Array.from({ length: 9 }, (_, i) => i + 10) // 10AM to 6PM
+  const timeSlots = Array.from({ length: 9 }, (_, i) => i + 10); // 10AM to 6PM
 
   const getEventColor = (index: number) => {
     const colors = [
-      { bg: 'bg-purple-50', border: 'border-purple-600', text: 'text-purple-600' },
-      { bg: 'bg-green-50', border: 'border-green-600', text: 'text-green-600' },
-      { bg: 'bg-blue-50', border: 'border-blue-600', text: 'text-blue-600' },
-      { bg: 'bg-yellow-50', border: 'border-yellow-600', text: 'text-yellow-600' },
-    ]
-    return colors[index % colors.length]
-  }
+      {
+        bg: "bg-purple-50",
+        border: "border-purple-600",
+        text: "text-purple-600",
+      },
+      { bg: "bg-green-50", border: "border-green-600", text: "text-green-600" },
+      { bg: "bg-blue-50", border: "border-blue-600", text: "text-blue-600" },
+      {
+        bg: "bg-yellow-50",
+        border: "border-yellow-600",
+        text: "text-yellow-600",
+      },
+    ];
+    return colors[index % colors.length];
+  };
 
   return (
     <section className="relative bg-stone-50 py-24">
@@ -57,68 +70,125 @@ export default function WeeklyView({ events, currentWeekOffset, getFirstWeekWith
               />
             </svg>
             <h6 className="text-xl leading-8 font-semibold text-gray-900">
-              {startOfWeek.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' })} - {new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', year: 'numeric' })}
+              {(() => {
+                const endOfWeek = new Date(
+                  startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000
+                );
+                const startMonth = startOfWeek.getMonth();
+                const endMonth = endOfWeek.getMonth();
+                const year = startOfWeek.getFullYear();
+
+                if (startMonth === endMonth) {
+                  return `${year}年 ${startOfWeek.toLocaleDateString("ja-JP", {
+                    month: "long",
+                  })}`;
+                } else {
+                  return `${year}年 ${startOfWeek.toLocaleDateString("ja-JP", {
+                    month: "long",
+                  })} 〜 ${endOfWeek.toLocaleDateString("ja-JP", {
+                    month: "long",
+                  })}`;
+                }
+              })()}
             </h6>
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setCurrentWeekOffset(prev => prev - 1)}
+              onClick={() => setCurrentWeekOffset((prev) => prev - 1)}
               className="p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-200"
             >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg
+                className="w-5 h-5 text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </button>
             <button
-              onClick={() => setCurrentWeekOffset(prev => prev + 1)}
+              onClick={() => setCurrentWeekOffset((prev) => prev + 1)}
               className="p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-200"
             >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <svg
+                className="w-5 h-5 text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </button>
           </div>
         </div>
         <div className="relative">
-          <div className="grid grid-cols-8 border-t border-gray-200 sticky top-0 left-0 w-full">
-            <div className="p-3.5 flex items-center justify-center text-sm font-medium text-gray-900"></div>
+          <div className="grid border-t border-gray-200 sticky top-0 left-0 w-full" style={{gridTemplateColumns: 'auto 1fr 1fr 1fr 1fr 1fr 1fr 1fr'}}>
+            <div className="px-2 py-3.5 flex items-center justify-center text-sm font-medium text-gray-900 w-16"></div>
             {weekDays.map((day, index) => (
               <div
                 key={index}
-                className={`p-3.5 flex items-center justify-center text-sm font-medium ${
-                  day.toDateString() === currentDate.toDateString() ? 'text-indigo-600' : 'text-gray-900'
+                className={`p-3.5 flex flex-col items-center justify-center ${
+                  day.toDateString() === currentDate.toDateString()
+                    ? "text-indigo-600"
+                    : "text-gray-900"
                 }`}
               >
-                {day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                <div className="text-xs font-medium mb-1">
+                  {day.toLocaleDateString("ja-JP", { weekday: "short" })}
+                </div>
+                <div className="text-2xl font-bold">{day.getDate()}</div>
               </div>
             ))}
           </div>
-          <div className="hidden grid-cols-8 sm:grid w-full overflow-x-auto relative">
+          <div className="hidden sm:grid w-full overflow-x-auto relative mt-6" style={{gridTemplateColumns: 'auto 1fr 1fr 1fr 1fr 1fr 1fr 1fr'}}>
             {/* Time labels column */}
-            <div className="flex flex-col">
+            <div className="flex flex-col w-16 relative overflow-visible">
               {timeSlots.map((hour) => (
-                <div key={hour} className="h-32 lg:h-28 p-0.5 md:p-3.5 border-t border-r border-gray-200 flex items-end transition-all hover:bg-stone-100">
-                  <span className="text-xs font-semibold text-gray-400">
-                    {hour < 12 ? `${String(hour).padStart(2, '0')}:00 am` : hour === 12 ? '12:00 pm' : `${String(hour - 12).padStart(2, '0')}:00 pm`}
+                <div
+                  key={hour}
+                  className="h-32 lg:h-28 border-r border-gray-200 relative"
+                >
+                  <span className="absolute left-2 top-0 -mt-2 text-xs font-medium text-gray-500 whitespace-nowrap z-10">
+                    {`${String(hour).padStart(2, "0")}:00`}
                   </span>
                 </div>
               ))}
             </div>
-            
+
             {/* Day columns with absolute positioned events */}
             {weekDays.map((day, dayIndex) => {
-              const dayEvents = getEventsForDay(day)
-              const isToday = day.toDateString() === currentDate.toDateString()
-              const currentHour = new Date().getHours()
-              const currentMinutes = new Date().getMinutes()
-              
+              const dayEvents = getEventsForDay(day).sort((a, b) => {
+                const aStart = new Date(a.start).getTime();
+                const bStart = new Date(b.start).getTime();
+                if (aStart !== bStart) return aStart - bStart;
+                // If start times are equal, sort by end time
+                return new Date(a.end).getTime() - new Date(b.end).getTime();
+              });
+              const isToday = day.toDateString() === currentDate.toDateString();
+              const currentHour = new Date().getHours();
+              const currentMinutes = new Date().getMinutes();
+
               // Calculate current time position as percentage
-              const currentTimeHour = currentHour + (currentMinutes / 60)
-              const dayStartTime = timeSlots[0] // 10
-              const dayEndTime = timeSlots[timeSlots.length - 1] + 1 // 19
-              const currentTimePercent = ((currentTimeHour - dayStartTime) / (dayEndTime - dayStartTime)) * 100
-              const showCurrentTimeLine = isToday && currentHour >= 10 && currentHour <= 18
-              
+              const currentTimeHour = currentHour + currentMinutes / 60;
+              const dayStartTime = timeSlots[0]; // 10
+              const dayEndTime = timeSlots[timeSlots.length - 1] + 1; // 19
+              const currentTimePercent =
+                ((currentTimeHour - dayStartTime) /
+                  (dayEndTime - dayStartTime)) *
+                100;
+              const showCurrentTimeLine =
+                isToday && currentHour >= 10 && currentHour <= 18;
+
               return (
                 <div key={dayIndex} className="relative">
                   {/* Background grid for this day */}
@@ -126,88 +196,161 @@ export default function WeeklyView({ events, currentWeekOffset, getFirstWeekWith
                     {timeSlots.map((hour) => (
                       <div
                         key={hour}
-                        className="h-32 lg:h-28 p-0.5 md:p-3.5 border-t border-r border-gray-200 transition-all hover:bg-stone-100"
-                      />
+                        className="h-32 lg:h-28 p-0.5 md:p-3.5 border-t border-r border-gray-200 transition-all hover:bg-stone-100 relative"
+                      >
+                        <div className="absolute -left-4 top-0 w-4 border-t border-gray-200"></div>
+                      </div>
                     ))}
                   </div>
-                  
+
                   {/* Current time line */}
                   {showCurrentTimeLine && (
-                    <div 
+                    <div
                       className="absolute left-0 right-0 z-30 flex items-center"
                       style={{
-                        top: `${Math.max(0, Math.min(100, currentTimePercent))}%`
+                        top: `${Math.max(
+                          0,
+                          Math.min(100, currentTimePercent)
+                        )}%`,
                       }}
                     >
                       <div className="w-2 h-2 bg-blue-500 rounded-full -ml-1"></div>
                       <div className="flex-1 border-t-2 border-blue-500"></div>
                     </div>
                   )}
-                  
+
                   {/* Events for this day */}
-                  {dayEvents.map((event, eventIndex) => {
-                    const eventStart = new Date(event.start)
-                    const eventEnd = new Date(event.end)
-                    const eventStartHour = eventStart.getHours()
-                    const eventStartMinutes = eventStart.getMinutes()
-                    const eventEndHour = eventEnd.getHours()
-                    const eventEndMinutes = eventEnd.getMinutes()
-                    
-                    // Calculate event position within the day
-                    const eventStartTime = eventStartHour + (eventStartMinutes / 60)
-                    const eventEndTime = eventEndHour + (eventEndMinutes / 60)
-                    
-                    // Skip events outside the visible time range
-                    if (eventEndTime <= dayStartTime || eventStartTime >= dayEndTime) {
-                      return null
-                    }
-                    
-                    // Calculate position and height as percentage of the full day
-                    const visibleStart = Math.max(eventStartTime, dayStartTime)
-                    const visibleEnd = Math.min(eventEndTime, dayEndTime)
-                    const topPercent = ((visibleStart - dayStartTime) / (dayEndTime - dayStartTime)) * 100
-                    const heightPercent = ((visibleEnd - visibleStart) / (dayEndTime - dayStartTime)) * 100
-                    
-                    // Check for overlapping events and calculate horizontal offset
-                    const overlappingEvents = dayEvents.filter((otherEvent, otherIndex) => {
-                      if (otherIndex >= eventIndex) return false
-                      const otherStart = new Date(otherEvent.start).getTime()
-                      const otherEnd = new Date(otherEvent.end).getTime()
-                      const currentStart = eventStart.getTime()
-                      const currentEnd = eventEnd.getTime()
-                      return (currentStart < otherEnd && currentEnd > otherStart)
-                    })
-                    
-                    const overlapCount = overlappingEvents.length
-                    const color = getEventColor(eventIndex)
-                    
-                    // Calculate margins with overlap offset (mobile: 2px base, desktop handled by Tailwind)
-                    const leftMargin = 2 + (overlapCount * 20)
-                    const rightMargin = 2 + (overlapCount * 10)
-                    
-                    return (
-                      <div
-                        key={eventIndex}
-                        className={`absolute rounded p-1.5 border-l-2 ${color.bg} ${color.border} z-20`}
-                        style={{
-                          top: `${topPercent}%`,
-                          height: `${Math.max(heightPercent, 5)}%`,
-                          left: `${leftMargin}px`,
-                          right: `${rightMargin}px`,
-                        }}
-                      >
-                        <p className="text-xs font-normal text-gray-900 mb-px truncate">
-                          {event.summary}
-                        </p>
-                        <p className={`text-xs font-semibold ${color.text} truncate`}>
-                          {eventStart.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} - 
-                          {eventEnd.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      </div>
-                    )
-                  })}
+                  {(() => {
+                    // Pre-process events to assign column positions
+                    const eventsWithColumns = dayEvents.map(
+                      (event, eventIndex) => {
+                        const eventStart = new Date(event.start);
+                        const eventEnd = new Date(event.end);
+                        const eventStartTime =
+                          eventStart.getHours() + eventStart.getMinutes() / 60;
+                        const eventEndTime =
+                          eventEnd.getHours() + eventEnd.getMinutes() / 60;
+
+                        return {
+                          ...event,
+                          eventIndex,
+                          eventStart,
+                          eventEnd,
+                          eventStartTime,
+                          eventEndTime,
+                          column: -1, // Will be assigned later
+                        };
+                      }
+                    );
+
+                    // Assign columns to overlapping events
+                    eventsWithColumns.forEach((event) => {
+                      if (
+                        event.eventEndTime <= dayStartTime ||
+                        event.eventStartTime >= dayEndTime
+                      ) {
+                        return; // Skip events outside visible range
+                      }
+
+                      // Find all events that overlap with this event
+                      const overlappingEvents = eventsWithColumns.filter(
+                        (otherEvent) => {
+                          if (otherEvent === event) return false;
+                          return (
+                            event.eventStartTime < otherEvent.eventEndTime &&
+                            event.eventEndTime > otherEvent.eventStartTime
+                          );
+                        }
+                      );
+
+                      // Find the first available column
+                      const usedColumns = overlappingEvents
+                        .map((e) => e.column)
+                        .filter((col) => col >= 0);
+                      let column = 0;
+                      while (usedColumns.includes(column)) {
+                        column++;
+                      }
+                      event.column = column;
+                    });
+
+                    return eventsWithColumns.map((event) => {
+                      const {
+                        eventStart,
+                        eventEnd,
+                        eventStartTime,
+                        eventEndTime,
+                        eventIndex,
+                        column,
+                      } = event;
+
+                      // Skip events outside the visible time range
+                      if (
+                        eventEndTime <= dayStartTime ||
+                        eventStartTime >= dayEndTime
+                      ) {
+                        return null;
+                      }
+
+                      // Calculate position and height as percentage of the full day
+                      const visibleStart = Math.max(
+                        eventStartTime,
+                        dayStartTime
+                      );
+                      const visibleEnd = Math.min(eventEndTime, dayEndTime);
+                      const topPercent =
+                        ((visibleStart - dayStartTime) /
+                          (dayEndTime - dayStartTime)) *
+                        100;
+                      const heightPercent =
+                        ((visibleEnd - visibleStart) /
+                          (dayEndTime - dayStartTime)) *
+                        100;
+
+                      const color = getEventColor(eventIndex);
+
+                      // Calculate margins with column offset
+                      const leftMargin = column * 20;
+                      const rightMargin = 20 + column * 10;
+
+                      return (
+                        <div
+                          key={eventIndex}
+                          className={`absolute rounded p-1.5 border-l-2 ${color.bg} ${color.border} z-20`}
+                          style={{
+                            top: `${topPercent}%`,
+                            height: `${Math.max(heightPercent, 5)}%`,
+                            left: `${leftMargin}px`,
+                            right: `${rightMargin}px`,
+                          }}
+                          data-debug-index={eventIndex}
+                          data-debug-column={column}
+                          data-debug-left-margin={leftMargin}
+                          data-debug-event-start={event.start}
+                          data-debug-event-summary={event.summary}
+                        >
+                          <p className="text-xs font-normal text-gray-900 mb-px truncate">
+                            {event.summary}
+                          </p>
+                          <p
+                            className={`text-xs font-semibold ${color.text} truncate`}
+                          >
+                            {eventStart.toLocaleTimeString("ja-JP", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}{" "}
+                            -
+                            {eventEnd.toLocaleTimeString("ja-JP", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                        </div>
+                      );
+                    });
+                  })()}
                 </div>
-              )
+              );
             })}
           </div>
         </div>
@@ -218,21 +361,24 @@ export default function WeeklyView({ events, currentWeekOffset, getFirstWeekWith
                 key={hour}
                 className="w-20 h-20 p-2 flex items-end text-xs font-semibold text-gray-400 border-b border-r border-gray-200"
               >
-                {hour < 12 ? `${String(hour).padStart(2, '0')}:00 am` : hour === 12 ? '12:00 pm' : `${String(hour - 12).padStart(2, '0')}:00 pm`}
+{`${String(hour).padStart(2, "0")}:00`}
               </div>
             ))}
           </div>
           <div className="grid grid-cols-1 w-full">
             {timeSlots.map((hour) => {
-              const hourEvents = events.filter(event => {
-                const eventHour = new Date(event.start).getHours()
-                return eventHour === hour
-              })
-              
+              const hourEvents = events.filter((event) => {
+                const eventHour = new Date(event.start).getHours();
+                return eventHour === hour;
+              });
+
               return (
-                <div key={hour} className="w-full h-20 border-b border-gray-200 p-1.5">
+                <div
+                  key={hour}
+                  className="w-full h-20 border-b border-gray-200 p-1.5"
+                >
                   {hourEvents.map((event, eventIndex) => {
-                    const color = getEventColor(eventIndex)
+                    const color = getEventColor(eventIndex);
                     return (
                       <div
                         key={eventIndex}
@@ -242,18 +388,25 @@ export default function WeeklyView({ events, currentWeekOffset, getFirstWeekWith
                           {event.summary}
                         </p>
                         <p className={`text-xs font-semibold ${color.text}`}>
-                          {new Date(event.start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} - 
-                          {new Date(event.end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(event.start).toLocaleTimeString("ja-JP", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}{" "}
+                          -
+                          {new Date(event.end).toLocaleTimeString("ja-JP", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                         </p>
                       </div>
-                    )
+                    );
                   })}
                 </div>
-              )
+              );
             })}
           </div>
         </div>
       </div>
     </section>
-  )
+  );
 }

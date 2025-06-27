@@ -5,7 +5,7 @@ export const CALENDAR_CONFIG = {
   PRIMARY_CALENDAR_ID: "primary",
 
   // 生成カレンダー設定
-  CALENDAR_NAME: "なありしごと",
+  CALENDAR_NAME: "なありみーてぃんぐ",
   CALENDAR_DESCRIPTION: "なありがミーティングしてる時間",
   TIMEZONE: "Asia/Tokyo",
   TTL_HOURS: 1,

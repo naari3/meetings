@@ -2,10 +2,14 @@ import { CalendarEvent } from '../types'
 
 interface DailyViewProps {
   events: CalendarEvent[]
+  currentDayOffset: number
+  setCurrentDayOffset: (callback: (prev: number) => number) => void
 }
 
-export default function DailyView({ events }: DailyViewProps) {
-  const currentDate = new Date()
+export default function DailyView({ events, currentDayOffset, setCurrentDayOffset }: DailyViewProps) {
+  const baseDate = new Date()
+  const currentDate = new Date(baseDate)
+  currentDate.setDate(baseDate.getDate() + currentDayOffset)
   
   const getEventsForToday = () => {
     return events.filter(event => {
@@ -14,7 +18,13 @@ export default function DailyView({ events }: DailyViewProps) {
     })
   }
 
-  const todayEvents = getEventsForToday()
+  const todayEvents = getEventsForToday().sort((a, b) => {
+    const aStart = new Date(a.start).getTime()
+    const bStart = new Date(b.start).getTime()
+    if (aStart !== bStart) return aStart - bStart
+    // If start times are equal, sort by end time
+    return new Date(a.end).getTime() - new Date(b.end).getTime()
+  })
   const timeSlots = Array.from({ length: 9 }, (_, i) => i + 10) // 10AM to 6PM
 
   const getEventColor = (index: number) => {
@@ -45,19 +55,39 @@ export default function DailyView({ events }: DailyViewProps) {
               />
             </svg>
             <h6 className="text-xl leading-8 font-semibold text-gray-900">
-              {currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+              {currentDate.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
             </h6>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentDayOffset(prev => prev - 1)}
+              className="p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-200"
+            >
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setCurrentDayOffset(prev => prev + 1)}
+              className="p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all duration-200"
+            >
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
         </div>
         <div className="relative">
-          <div className="flex border-t border-gray-200 w-full">
-            <div className="flex flex-col">
+          <div className="flex border-t border-gray-200 w-full relative ml-12 mt-6">
+            <div className="flex flex-col w-0 relative overflow-visible">
               {timeSlots.map((hour) => (
                 <div
                   key={hour}
-                  className="w-20 h-20 p-1.5 flex items-end text-xs font-semibold text-gray-400 border-b border-r border-gray-200"
+                  className="h-20 border-b border-r border-gray-200 relative"
                 >
-                  {hour < 12 ? `${hour}:00 am` : hour === 12 ? '12:00 pm' : `${hour - 12}:00 pm`}
+                  <span className="absolute -left-12 top-0 -mt-2 text-xs font-medium text-gray-500 whitespace-nowrap z-10">
+                    {`${String(hour).padStart(2, '0')}:00`}
+                  </span>
                 </div>
               ))}
             </div>
@@ -94,69 +124,96 @@ export default function DailyView({ events }: DailyViewProps) {
               })()}
               
               {/* Events for today */}
-              {todayEvents.map((event, eventIndex) => {
-                const eventStart = new Date(event.start)
-                const eventEnd = new Date(event.end)
-                const eventStartHour = eventStart.getHours()
-                const eventStartMinutes = eventStart.getMinutes()
-                const eventEndHour = eventEnd.getHours()
-                const eventEndMinutes = eventEnd.getMinutes()
-                
-                // Calculate event position within the day
-                const eventStartTime = eventStartHour + (eventStartMinutes / 60)
-                const eventEndTime = eventEndHour + (eventEndMinutes / 60)
-                const dayStartTime = timeSlots[0] // 10
-                const dayEndTime = timeSlots[timeSlots.length - 1] + 1 // 19
-                
-                // Skip events outside the visible time range
-                if (eventEndTime <= dayStartTime || eventStartTime >= dayEndTime) {
-                  return null
-                }
-                
-                // Calculate position and height as percentage of the full day
-                const visibleStart = Math.max(eventStartTime, dayStartTime)
-                const visibleEnd = Math.min(eventEndTime, dayEndTime)
-                const topPercent = ((visibleStart - dayStartTime) / (dayEndTime - dayStartTime)) * 100
-                const heightPercent = ((visibleEnd - visibleStart) / (dayEndTime - dayStartTime)) * 100
-                
-                // Check for overlapping events and calculate horizontal offset
-                const overlappingEvents = todayEvents.filter((otherEvent, otherIndex) => {
-                  if (otherIndex >= eventIndex) return false
-                  const otherStart = new Date(otherEvent.start).getTime()
-                  const otherEnd = new Date(otherEvent.end).getTime()
-                  const currentStart = eventStart.getTime()
-                  const currentEnd = eventEnd.getTime()
-                  return (currentStart < otherEnd && currentEnd > otherStart)
+              {(() => {
+                // Pre-process events to assign column positions
+                const eventsWithColumns = todayEvents.map((event, eventIndex) => {
+                  const eventStart = new Date(event.start)
+                  const eventEnd = new Date(event.end)
+                  const eventStartTime = eventStart.getHours() + (eventStart.getMinutes() / 60)
+                  const eventEndTime = eventEnd.getHours() + (eventEnd.getMinutes() / 60)
+                  
+                  return {
+                    ...event,
+                    eventIndex,
+                    eventStart,
+                    eventEnd,
+                    eventStartTime,
+                    eventEndTime,
+                    column: -1 // Will be assigned later
+                  }
                 })
                 
-                const overlapCount = overlappingEvents.length
-                const color = getEventColor(eventIndex)
+                // Assign columns to overlapping events
+                const dayStartTime = timeSlots[0]
+                const dayEndTime = timeSlots[timeSlots.length - 1] + 1
                 
-                // Calculate margins with overlap offset
-                const leftMargin = 6 + (overlapCount * 20) // 6px base margin
-                const rightMargin = 6 + (overlapCount * 10)
+                eventsWithColumns.forEach((event) => {
+                  if (event.eventEndTime <= dayStartTime || event.eventStartTime >= dayEndTime) {
+                    return // Skip events outside visible range
+                  }
+                  
+                  // Find all events that overlap with this event
+                  const overlappingEvents = eventsWithColumns.filter((otherEvent) => {
+                    if (otherEvent === event) return false
+                    return (event.eventStartTime < otherEvent.eventEndTime && event.eventEndTime > otherEvent.eventStartTime)
+                  })
+                  
+                  // Find the first available column
+                  const usedColumns = overlappingEvents.map(e => e.column).filter(col => col >= 0)
+                  let column = 0
+                  while (usedColumns.includes(column)) {
+                    column++
+                  }
+                  event.column = column
+                })
                 
-                return (
-                  <div
-                    key={eventIndex}
-                    className={`absolute rounded p-1.5 border-l-2 ${color.bg} ${color.border} z-20`}
-                    style={{
-                      top: `${topPercent}%`,
-                      height: `${Math.max(heightPercent, 5)}%`,
-                      left: `${leftMargin}px`,
-                      right: `${rightMargin}px`,
-                    }}
-                  >
-                    <p className="text-xs font-normal text-gray-900 mb-px truncate">
-                      {event.summary}
-                    </p>
-                    <p className={`text-xs font-semibold ${color.text} truncate`}>
-                      {eventStart.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} - 
-                      {eventEnd.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  </div>
-                )
-              })}
+                return eventsWithColumns.map((event) => {
+                  const { eventStart, eventEnd, eventStartTime, eventEndTime, eventIndex, column } = event
+                  
+                  // Skip events outside the visible time range
+                  if (eventEndTime <= dayStartTime || eventStartTime >= dayEndTime) {
+                    return null
+                  }
+                  
+                  // Calculate position and height as percentage of the full day
+                  const visibleStart = Math.max(eventStartTime, dayStartTime)
+                  const visibleEnd = Math.min(eventEndTime, dayEndTime)
+                  const topPercent = ((visibleStart - dayStartTime) / (dayEndTime - dayStartTime)) * 100
+                  const heightPercent = ((visibleEnd - visibleStart) / (dayEndTime - dayStartTime)) * 100
+                  
+                  const color = getEventColor(eventIndex)
+                  
+                  // Calculate margins with column offset
+                  const leftMargin = column * 20
+                  const rightMargin = 6 + (column * 10)
+                  
+                  return (
+                    <div
+                      key={eventIndex}
+                      className={`absolute rounded p-1.5 border-l-2 ${color.bg} ${color.border} z-20`}
+                      style={{
+                        top: `${topPercent}%`,
+                        height: `${Math.max(heightPercent, 5)}%`,
+                        left: `${leftMargin}px`,
+                        right: `${rightMargin}px`,
+                      }}
+                      data-debug-index={eventIndex}
+                      data-debug-column={column}
+                      data-debug-left-margin={leftMargin}
+                      data-debug-event-start={event.start}
+                      data-debug-event-summary={event.summary}
+                    >
+                      <p className="text-xs font-normal text-gray-900 mb-px truncate">
+                        {event.summary}
+                      </p>
+                      <p className={`text-xs font-semibold ${color.text} truncate`}>
+                        {eventStart.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} - 
+                        {eventEnd.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  )
+                })
+              })()}
             </div>
           </div>
           

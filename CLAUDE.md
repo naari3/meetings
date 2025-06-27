@@ -1,104 +1,91 @@
-# gcal-sync Project Analysis Report
+# CLAUDE.md
 
-## Project Overview
-- **Name**: gcal-sync  
-- **Description**: Google Calendar Integration Web Application
-- **Tech Stack**: React + TypeScript + Vite + Tailwind CSS
-- **Purpose**: Fetch Google Calendar events and display them as a web calendar
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Architecture
+## Development Commands
 
-### Frontend
-- **React 19.1.0** (Latest version)
-- **TypeScript** (Type safety)
-- **Tailwind CSS 4.1.10** (Styling)
-- **Vite 6.3.5** (Build tool)
+- `pnpm dev` - Start development server with hot reload
+- `pnpm build` - Production build (fetches Google Calendar data and generates static assets)
+- `pnpm preview` - Preview the built application
+- `pnpm serve` - Start preview server and auto-open in browser
 
-### Backend/API
-- **Google APIs** (googleapis 126.0.1)
-- **Vite Plugin** (Custom build-time processing)
-- **iCal Generation** (ical-generator 9.0.0)
+**Build Process**: The build command runs a custom Vite plugin that fetches Google Calendar data and generates both `events.json` and `availability.ics` files. Development mode uses cached data to avoid unnecessary API calls.
 
-## Component Structure
+## Architecture Overview
 
-### Main Components
-1. **App.tsx** - Main application
-   - 3 view mode switching (`monthly`/`weekly`/`daily`)
-   - Event data management
-   - Loading state management
+This is a **Build-Time Data Processing** React application that integrates with Google Calendar API in a privacy-conscious manner.
 
-2. **StatsCard.tsx** - Statistics dashboard
-   - Total events, total hours, today's events, etc.
-   - Detailed statistics display
+### Key Architectural Pattern
 
-3. **CalendarGrid.tsx** - Monthly calendar view
-   - 6-week grid display
-   - Event display functionality
+- **Build-time Processing**: Google Calendar data is fetched during build (not at runtime)
+- **Privacy-First**: All event details are anonymized as "予定あり" (Busy) to protect privacy
+- **Static Asset Generation**: Calendar data is pre-processed into static JSON files
+- **Multi-format Output**: Generates both web interface and iCalendar (.ics) export
 
-4. **WeeklyView.tsx** - Weekly calendar view
-   - 7-day time slot display
-   - Current time line display
+### Tech Stack
 
-5. **DailyView.tsx** - Daily calendar view
-   - Single day time slot display
-   - Hourly event placement
+- React 19.1.0 + TypeScript + Vite 6.3.5
+- Tailwind CSS 4.1.10 for styling
+- googleapis 126.0.1 for Google Calendar API
+- Custom Vite plugin for build-time calendar integration
 
 ## Data Flow
 
-### Build-time Processing
-1. **vite-plugin-gcal.ts** calls Google Calendar API
-2. `calendar-fetch.ts` fetches events
-3. Generates `events.json` and `availability.ics` files
-4. Serves as `public/events.json`
+### Build-time Flow
 
-### Runtime Processing
-1. Frontend fetches `/events.json`
-2. Managed by React state
-3. Rendered by each view component
+```
+Google Calendar API → calendar-fetch.ts → vite-plugin-gcal.ts → {events.json, availability.ics}
+```
 
-## Configuration & Constants
+### Runtime Flow
 
-### CALENDAR_CONFIG (constants.ts)
-- **CALENDAR_NAME**: "なありしごと"
-- **TIMEZONE**: "Asia/Tokyo"
-- **FUTURE_MONTHS**: 1 month ahead
-- **MAX_EVENTS**: 2500 events limit
+```
+/events.json → App.tsx → {WeeklyView, DailyView, StatsCard}
+```
 
-## Features & Functionality
+## Core Components
 
-### Display Features
-- **3 View Modes**: Monthly/Weekly/Daily
-- **Responsive Design**: Mobile compatible
-- **Real-time Display**: Current time line
-- **Statistics Dashboard**: Detailed schedule analysis
+### Build System
 
-### Data Processing
-- **Privacy Protection**: Anonymizes actual event details as "予定あり"
-- **iCal Export**: External calendar application integration
-- **Cache Functionality**: Avoids unnecessary API calls during development
+- **`src/vite-plugin-gcal.ts`**: Custom Vite plugin that orchestrates Google Calendar integration during build
+- **`src/calendar-fetch.ts`**: Handles Google Calendar API calls, authentication, and data anonymization
 
-## Technical Features
+### Frontend Components
 
-### Modern Technology Adoption
-- React 19 latest features
-- TypeScript strict mode
-- ES2020 target
-- Tailwind CSS v4
+- **`src/App.tsx`**: Main application with view switching (Weekly/Daily) and state management
+- **`src/components/WeeklyView.tsx`**: 7-day calendar grid with time slots (10 AM - 6 PM)
+- **`src/components/DailyView.tsx`**: Single day detailed view with hourly breakdown
+- **`src/components/StatsCard.tsx`**: Analytics dashboard showing schedule statistics
 
-### Performance
-- Fast builds with Vite
-- Optimized bundles
-- Efficient rendering
+### Configuration
 
-## Security
-- Google OAuth authentication
-- API key management
-- Private information anonymization
+- **`src/constants.ts`**: Contains `CALENDAR_CONFIG` with calendar name, timezone (Asia/Tokyo), and anonymization settings
+- **`src/types.ts`**: TypeScript type definitions for calendar events and application state
 
-## Development Commands
-- `pnpm dev` - Start development server
-- `pnpm build` - Production build
-- `pnpm preview` - Preview server
-- `pnpm serve` - Post-build preview (auto-open browser)
+## Important Implementation Details
 
-This project is a Google Calendar integration application utilizing modern web technologies, featuring excellent design and usability.
+### Google Calendar Integration
+
+- Uses Application Default Credentials for authentication
+- Configured for "なありしごと" calendar in Asia/Tokyo timezone
+- Fetches 1 month ahead with 2500 event limit
+- All events are anonymized for privacy protection
+
+### Development vs Production
+
+- **Development**: Uses cached calendar data to avoid API rate limits
+- **Production**: Fresh API calls during each build to generate updated static assets
+
+### View Navigation
+
+- Week navigation starts from the first week containing events (not current week)
+- Daily view focuses on today's schedule with chronological event ordering
+- Statistics provide comprehensive analytics including total hours and weekly averages
+
+## File Structure Notes
+
+The application follows a clean separation between build-time processing (`calendar-fetch.ts`, `vite-plugin-gcal.ts`) and runtime components (`App.tsx`, `components/`). The custom Vite plugin extends the build process to handle Google Calendar integration seamlessly.
+
+## Development Tools
+
+- Use Playweight MCP to check your code modifications

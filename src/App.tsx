@@ -10,6 +10,7 @@ function App() {
   const [view, setView] = useState<'weekly' | 'daily'>('weekly')
   const [generatedAt, setGeneratedAt] = useState<string>('')
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0)
+  const [currentDayOffset, setCurrentDayOffset] = useState(0)
 
   // Get the first week with events
   const getFirstWeekWithEvents = (events: CalendarEvent[]) => {
@@ -64,7 +65,7 @@ function App() {
             </svg>
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-3">
-            なありしごと
+            なありみーてぃんぐ
           </h1>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
             なあり仕事やっとるでよ
@@ -118,7 +119,7 @@ function App() {
         ) : (
           <div className="space-y-8">
             {view === 'weekly' && <WeeklyView events={events} currentWeekOffset={currentWeekOffset} getFirstWeekWithEvents={getFirstWeekWithEvents} setCurrentWeekOffset={setCurrentWeekOffset} />}
-            {view === 'daily' && <DailyView events={events} />}
+            {view === 'daily' && <DailyView events={events} currentDayOffset={currentDayOffset} setCurrentDayOffset={setCurrentDayOffset} />}
           </div>
         )}
 

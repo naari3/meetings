@@ -40,13 +40,25 @@ export default function WeeklyView({
         bg: "bg-purple-50",
         border: "border-purple-600",
         text: "text-purple-600",
+        fade: "from-purple-50",
       },
-      { bg: "bg-green-50", border: "border-green-600", text: "text-green-600" },
-      { bg: "bg-blue-50", border: "border-blue-600", text: "text-blue-600" },
+      { 
+        bg: "bg-green-50", 
+        border: "border-green-600", 
+        text: "text-green-600",
+        fade: "from-green-50",
+      },
+      { 
+        bg: "bg-blue-50", 
+        border: "border-blue-600", 
+        text: "text-blue-600",
+        fade: "from-blue-50",
+      },
       {
         bg: "bg-yellow-50",
         border: "border-yellow-600",
         text: "text-yellow-600",
+        fade: "from-yellow-50",
       },
     ];
     return colors[index % colors.length];
@@ -131,42 +143,64 @@ export default function WeeklyView({
             </button>
           </div>
         </div>
-        <div className="relative">
-          <div className="grid border-t border-gray-200 sticky top-0 left-0 w-full" style={{gridTemplateColumns: 'auto 1fr 1fr 1fr 1fr 1fr 1fr 1fr'}}>
-            <div className="px-2 py-3.5 flex items-center justify-center text-sm font-medium text-gray-900 w-16"></div>
-            {weekDays.map((day, index) => (
+        <div className="relative flex overflow-x-auto">
+          {/* Time column */}
+          <div className="flex flex-col sticky left-0 bg-stone-50 z-10">
+            {/* Header spacer */}
+            <div className="px-2 py-3.5 flex flex-col items-center justify-center text-sm font-medium text-gray-900">
+              <div className="text-xs font-medium mb-1 invisible">月</div>
+              <div className="text-2xl font-bold invisible">99</div>
+            </div>
+            {/* Time slots */}
+            {timeSlots.map((hour) => (
               <div
-                key={index}
-                className={`p-3.5 flex flex-col items-center justify-center ${
-                  day.toDateString() === currentDate.toDateString()
-                    ? "text-indigo-600"
-                    : "text-gray-900"
-                }`}
+                key={hour}
+                className="h-16 lg:h-14 relative"
               >
-                <div className="text-xs font-medium mb-1">
-                  {day.toLocaleDateString("ja-JP", { weekday: "short" })}
-                </div>
-                <div className="text-2xl font-bold">{day.getDate()}</div>
+                <span className="absolute left-2 top-0 -mt-2 text-xs font-medium text-gray-500 whitespace-nowrap z-10">
+                  {`${String(hour).padStart(2, "0")}:00`}
+                </span>
               </div>
             ))}
           </div>
-          <div className="hidden sm:grid w-full overflow-x-auto relative mt-6" style={{gridTemplateColumns: 'auto 1fr 1fr 1fr 1fr 1fr 1fr 1fr'}}>
-            {/* Time labels column */}
-            <div className="flex flex-col w-16 relative overflow-visible">
-              {timeSlots.map((hour) => (
+
+          {/* Calendar section */}
+          <div className="flex-1 min-w-0">
+            {/* Header */}
+            <div className="grid sticky top-0 bg-stone-50 z-5" style={{gridTemplateColumns: '1rem 1fr 1fr 1fr 1fr 1fr 1fr 1fr'}}>
+              {/* Left border column */}
+              <div className="w-4 border-r border-gray-200"></div>
+              {weekDays.map((day, index) => (
                 <div
-                  key={hour}
-                  className="h-32 lg:h-28 border-r border-gray-200 relative"
+                  key={index}
+                  className={`p-3.5 flex flex-col items-center justify-center ${
+                    day.toDateString() === currentDate.toDateString()
+                      ? "text-indigo-600"
+                      : "text-gray-900"
+                  }`}
                 >
-                  <span className="absolute left-2 top-0 -mt-2 text-xs font-medium text-gray-500 whitespace-nowrap z-10">
-                    {`${String(hour).padStart(2, "0")}:00`}
-                  </span>
+                  <div className="text-xs font-medium mb-1">
+                    {day.toLocaleDateString("ja-JP", { weekday: "short" })}
+                  </div>
+                  <div className="text-2xl font-bold">{day.getDate()}</div>
                 </div>
               ))}
             </div>
 
-            {/* Day columns with absolute positioned events */}
-            {weekDays.map((day, dayIndex) => {
+            {/* Body */}
+            <div className="hidden sm:grid w-full relative" style={{gridTemplateColumns: '1rem 1fr 1fr 1fr 1fr 1fr 1fr 1fr'}}>
+              {/* Left border column */}
+              <div className="flex flex-col">
+                {timeSlots.map((hour) => (
+                  <div
+                    key={hour}
+                    className="h-16 lg:h-14 border-t border-r border-gray-200"
+                  >
+                  </div>
+                ))}
+              </div>
+              {/* Day columns with absolute positioned events */}
+              {weekDays.map((day, dayIndex) => {
               const dayEvents = getEventsForDay(day).sort((a, b) => {
                 const aStart = new Date(a.start).getTime();
                 const bStart = new Date(b.start).getTime();
@@ -196,9 +230,8 @@ export default function WeeklyView({
                     {timeSlots.map((hour) => (
                       <div
                         key={hour}
-                        className="h-32 lg:h-28 p-0.5 md:p-3.5 border-t border-r border-gray-200 transition-all hover:bg-stone-100 relative"
+                        className={`h-16 lg:h-14 p-0.5 md:p-3.5 border-t border-gray-200 transition-all hover:bg-stone-100 relative ${dayIndex < 6 ? 'border-r' : ''}`}
                       >
-                        <div className="absolute -left-4 top-0 w-4 border-t border-gray-200"></div>
                       </div>
                     ))}
                   </div>
@@ -329,22 +362,40 @@ export default function WeeklyView({
                           data-debug-event-start={event.start}
                           data-debug-event-summary={event.summary}
                         >
-                          <p className="text-xs font-normal text-gray-900 mb-px truncate">
-                            {event.summary}
-                          </p>
-                          <p
-                            className={`text-xs font-semibold ${color.text} truncate`}
-                          >
-                            {eventStart.toLocaleTimeString("ja-JP", {
+                          {(() => {
+                            const durationMinutes = (eventEnd.getTime() - eventStart.getTime()) / (1000 * 60);
+                            const timeString = `${eventStart.toLocaleTimeString("ja-JP", {
                               hour: "2-digit",
                               minute: "2-digit",
-                            })}{" "}
-                            -
-                            {eventEnd.toLocaleTimeString("ja-JP", {
+                            })} - ${eventEnd.toLocaleTimeString("ja-JP", {
                               hour: "2-digit",
                               minute: "2-digit",
-                            })}
-                          </p>
+                            })}`;
+                            
+                            if (durationMinutes <= 30) {
+                              return (
+                                <p className="text-xs font-normal text-gray-900 overflow-hidden relative">
+                                  <span className="block whitespace-nowrap">
+                                    {event.summary} <span className={`font-semibold ${color.text}`}>{timeString}</span>
+                                  </span>
+                                  <div className={`absolute top-0 right-0 w-4 h-full bg-gradient-to-l ${color.fade} to-transparent pointer-events-none`}></div>
+                                </p>
+                              );
+                            } else {
+                              return (
+                                <>
+                                  <p className="text-xs font-normal text-gray-900 mb-px overflow-hidden relative">
+                                    <span className="block whitespace-nowrap">{event.summary}</span>
+                                    <div className={`absolute top-0 right-0 w-4 h-full bg-gradient-to-l ${color.fade} to-transparent pointer-events-none`}></div>
+                                  </p>
+                                  <p className={`text-xs font-semibold ${color.text} overflow-hidden relative`}>
+                                    <span className="block whitespace-nowrap">{timeString}</span>
+                                    <div className={`absolute top-0 right-0 w-4 h-full bg-gradient-to-l ${color.fade} to-transparent pointer-events-none`}></div>
+                                  </p>
+                                </>
+                              );
+                            }
+                          })()}
                         </div>
                       );
                     });
@@ -352,6 +403,7 @@ export default function WeeklyView({
                 </div>
               );
             })}
+            </div>
           </div>
         </div>
         <div className="flex sm:hidden border-t border-gray-200 items-center w-full">

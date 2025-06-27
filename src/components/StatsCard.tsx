@@ -95,7 +95,7 @@ export default function StatsCard({ events }: StatsCardProps) {
     <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 mb-8">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">ダッシュボード</h2>
-        <p className="text-gray-600">あなたのスケジュールの概要</p>
+        <p className="text-gray-600">なありのスケジュールの概要</p>
       </div>
       
       <div className="flex flex-wrap justify-center gap-6 mb-8">

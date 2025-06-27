@@ -72,9 +72,6 @@ function App() {
           </p>
         </header>
 
-        {/* Stats Card */}
-        <StatsCard events={events} />
-
         {/* View Toggle */}
         <div className="flex justify-center mb-8">
           <div className="bg-white rounded-xl p-1 shadow-lg border border-gray-200 inline-flex">
@@ -122,6 +119,9 @@ function App() {
             {view === 'daily' && <DailyView events={events} currentDayOffset={currentDayOffset} setCurrentDayOffset={setCurrentDayOffset} />}
           </div>
         )}
+
+        {/* Stats Card */}
+        <StatsCard events={events} />
 
         {/* Footer */}
         <footer className="text-center mt-12">

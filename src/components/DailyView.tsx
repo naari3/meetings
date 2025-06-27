@@ -50,39 +50,77 @@ export default function DailyView({ events }: DailyViewProps) {
           </div>
         </div>
         <div className="relative">
-          <div className="flex border-t border-gray-200 items-center w-full">
+          <div className="flex border-t border-gray-200 w-full">
             <div className="flex flex-col">
               {timeSlots.map((hour) => (
                 <div
                   key={hour}
-                  className="w-20 h-20 p-2 flex items-end text-xs font-semibold text-gray-400 border-b border-r border-gray-200"
+                  className="w-20 h-20 p-1.5 flex items-end text-xs font-semibold text-gray-400 border-b border-r border-gray-200"
                 >
                   {hour < 12 ? `${hour}:00 am` : hour === 12 ? '12:00 pm' : `${hour - 12}:00 pm`}
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-1 w-full">
+            <div className="flex flex-col w-full">
               {timeSlots.map((hour) => {
-                const hourEvents = todayEvents.filter(event => {
-                  const eventHour = new Date(event.start).getHours()
-                  return eventHour === hour
-                })
+                const currentHour = new Date().getHours()
+                const currentMinutes = new Date().getMinutes()
+                const showCurrentTimeLine = currentHour === hour && currentHour >= 7 && currentHour <= 18
                 
                 return (
-                  <div key={hour} className="w-full h-20 border-b border-gray-200 p-1.5">
-                    {hourEvents.map((event, eventIndex) => {
+                  <div key={hour} className="w-full h-20 border-b border-gray-200 p-1.5 relative">
+                    {showCurrentTimeLine && (
+                      <div 
+                        className="absolute left-0 right-0 z-10 flex items-center"
+                        style={{
+                          top: `${(currentMinutes / 60) * 100}%`
+                        }}
+                      >
+                        <div className="w-2 h-2 bg-blue-500 rounded-full -ml-1"></div>
+                        <div className="flex-1 border-t-2 border-blue-500"></div>
+                      </div>
+                    )}
+                    {todayEvents.map((event, eventIndex) => {
+                      const eventStart = new Date(event.start)
+                      const eventEnd = new Date(event.end)
+                      const eventStartHour = eventStart.getHours()
+                      const eventStartMinutes = eventStart.getMinutes()
+                      const eventEndHour = eventEnd.getHours()
+                      const eventEndMinutes = eventEnd.getMinutes()
+                      
+                      // Calculate if event overlaps with current hour slot
+                      const eventStartTime = eventStartHour + (eventStartMinutes / 60)
+                      const eventEndTime = eventEndHour + (eventEndMinutes / 60)
+                      const slotStartTime = hour
+                      const slotEndTime = hour + 1
+                      
+                      // Check if event overlaps with this time slot
+                      if (eventEndTime <= slotStartTime || eventStartTime >= slotEndTime) {
+                        return null
+                      }
+                      
+                      // Calculate position and height within the slot
+                      const slotStart = Math.max(eventStartTime, slotStartTime)
+                      const slotEnd = Math.min(eventEndTime, slotEndTime)
+                      const topPercent = ((slotStart - slotStartTime) * 100)
+                      const heightPercent = ((slotEnd - slotStart) * 100)
+                      
                       const color = getEventColor(eventIndex)
                       return (
                         <div
                           key={eventIndex}
-                          className={`w-full h-full rounded p-1.5 border-l-2 ${color.bg} ${color.border}`}
+                          className={`absolute left-1.5 right-1.5 rounded p-1.5 border-l-2 ${color.bg} ${color.border} z-20`}
+                          style={{
+                            top: `${topPercent}%`,
+                            height: `${Math.max(heightPercent, 15)}%` // Minimum 15% height for visibility
+                          }}
                         >
-                          <p className="text-xs font-normal text-gray-900 mb-px">
+                          <p className="text-xs font-normal text-gray-900 mb-px truncate">
                             {event.summary}
                           </p>
-                          <p className={`text-xs font-semibold ${color.text}`}>
-                            {new Date(event.start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} - 
-                            {new Date(event.end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                          <p className={`text-xs font-semibold ${color.text} truncate`}>
+                            {eventStart.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} - 
+                            {eventEnd.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
                       )

@@ -70,7 +70,7 @@ export default function WeeklyView({ events }: WeeklyViewProps) {
               </div>
             ))}
           </div>
-          <div className="hidden grid-cols-8 sm:grid w-full overflow-x-auto">
+          <div className="hidden grid-cols-8 sm:grid w-full overflow-x-auto relative">
             {timeSlots.map((hour) => (
               <div key={hour} className="contents">
                 <div className="h-32 lg:h-28 p-0.5 md:p-3.5 border-t border-r border-gray-200 flex items-end transition-all hover:bg-stone-100">
@@ -79,29 +79,70 @@ export default function WeeklyView({ events }: WeeklyViewProps) {
                   </span>
                 </div>
                 {weekDays.map((day, dayIndex) => {
-                  const dayEvents = getEventsForDay(day).filter(event => {
-                    const eventHour = new Date(event.start).getHours()
-                    return eventHour === hour
-                  })
+                  const dayEvents = getEventsForDay(day)
+                  
+                  const isToday = day.toDateString() === currentDate.toDateString()
+                  const currentHour = new Date().getHours()
+                  const currentMinutes = new Date().getMinutes()
+                  const showCurrentTimeLine = isToday && currentHour === hour && currentHour >= 7 && currentHour <= 18
                   
                   return (
                     <div
                       key={dayIndex}
-                      className="h-32 lg:h-28 p-0.5 md:p-3.5 border-t border-r border-gray-200 transition-all hover:bg-stone-100"
+                      className="h-32 lg:h-28 p-0.5 md:p-3.5 border-t border-r border-gray-200 transition-all hover:bg-stone-100 relative"
                     >
+                      {showCurrentTimeLine && (
+                        <div 
+                          className="absolute left-0 right-0 z-10 flex items-center"
+                          style={{
+                            top: `${(currentMinutes / 60) * 100}%`
+                          }}
+                        >
+                          <div className="w-2 h-2 bg-blue-500 rounded-full -ml-1"></div>
+                          <div className="flex-1 border-t-2 border-blue-500"></div>
+                        </div>
+                      )}
                       {dayEvents.map((event, eventIndex) => {
+                        const eventStart = new Date(event.start)
+                        const eventEnd = new Date(event.end)
+                        const eventStartHour = eventStart.getHours()
+                        const eventStartMinutes = eventStart.getMinutes()
+                        const eventEndHour = eventEnd.getHours()
+                        const eventEndMinutes = eventEnd.getMinutes()
+                        
+                        // Calculate if event overlaps with current hour slot
+                        const eventStartTime = eventStartHour + (eventStartMinutes / 60)
+                        const eventEndTime = eventEndHour + (eventEndMinutes / 60)
+                        const slotStartTime = hour
+                        const slotEndTime = hour + 1
+                        
+                        // Check if event overlaps with this time slot
+                        if (eventEndTime <= slotStartTime || eventStartTime >= slotEndTime) {
+                          return null
+                        }
+                        
+                        // Calculate position and height within the slot
+                        const slotStart = Math.max(eventStartTime, slotStartTime)
+                        const slotEnd = Math.min(eventEndTime, slotEndTime)
+                        const topPercent = ((slotStart - slotStartTime) * 100)
+                        const heightPercent = ((slotEnd - slotStart) * 100)
+                        
                         const color = getEventColor(eventIndex)
                         return (
                           <div
                             key={eventIndex}
-                            className={`rounded p-1.5 border-l-2 ${color.bg} ${color.border}`}
+                            className={`absolute left-0.5 right-0.5 md:left-3.5 md:right-3.5 rounded p-1.5 border-l-2 ${color.bg} ${color.border} z-20`}
+                            style={{
+                              top: `${topPercent}%`,
+                              height: `${Math.max(heightPercent, 15)}%` // Minimum 15% height for visibility
+                            }}
                           >
-                            <p className="text-xs font-normal text-gray-900 mb-px">
+                            <p className="text-xs font-normal text-gray-900 mb-px truncate">
                               {event.summary}
                             </p>
-                            <p className={`text-xs font-semibold ${color.text}`}>
-                              {new Date(event.start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} - 
-                              {new Date(event.end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                            <p className={`text-xs font-semibold ${color.text} truncate`}>
+                              {eventStart.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} - 
+                              {eventEnd.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                             </p>
                           </div>
                         )

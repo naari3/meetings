@@ -24,12 +24,14 @@ export async function fetchCalendarEvents(): Promise<CalendarEvent[]> {
 
     // Get events from primary calendar for the configured time range
     const now = new Date();
+    const pastDate = new Date();
+    pastDate.setDate(now.getDate() - 28); // 4週間前
     const futureDate = new Date();
-    futureDate.setMonth(now.getMonth() + CALENDAR_CONFIG.FUTURE_MONTHS);
+    futureDate.setDate(now.getDate() + 28); // 4週間後
 
     const events = await calendar.events.list({
       calendarId: CALENDAR_CONFIG.PRIMARY_CALENDAR_ID,
-      timeMin: now.toISOString(),
+      timeMin: pastDate.toISOString(),
       timeMax: futureDate.toISOString(),
       maxResults: CALENDAR_CONFIG.MAX_EVENTS,
       singleEvents: true,

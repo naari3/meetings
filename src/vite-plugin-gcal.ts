@@ -1,33 +1,33 @@
-import type { Plugin } from 'vite';
-import { fetchCalendarEvents } from './calendar-fetch';
-import { CALENDAR_CONFIG } from './constants';
-import ical from 'ical-generator';
+import type { Plugin } from "vite";
+import { fetchCalendarEvents } from "./calendar-fetch";
+import { CALENDAR_CONFIG } from "./constants";
+import ical from "ical-generator";
 
 export function gcalPlugin(): Plugin {
   return {
-    name: 'vite-plugin-gcal',
-    
+    name: "vite-plugin-gcal",
+
     async buildStart() {
       // In development, check if files already exist to avoid unnecessary API calls
-      if (process.env.NODE_ENV === 'development') {
-        const fs = await import('fs');
-        const path = await import('path');
-        
-        const eventsPath = path.join(process.cwd(), 'public', 'events.json');
-        const icsPath = path.join(process.cwd(), 'dist', 'availability.ics');
-        
+      if (process.env.NODE_ENV === "development") {
+        const fs = await import("fs");
+        const path = await import("path");
+
+        const eventsPath = path.join(process.cwd(), "public", "events.json");
+        const icsPath = path.join(process.cwd(), "dist", "naari3-meetings.ics");
+
         if (fs.existsSync(eventsPath)) {
-          console.log('📋 Using existing events.json (development mode)');
+          console.log("📋 Using existing events.json (development mode)");
           return;
         }
       }
-      
-      console.log('🔄 Fetching Google Calendar events...');
-      
+
+      console.log("🔄 Fetching Google Calendar events...");
+
       try {
         // Fetch events from Google Calendar
         const events = await fetchCalendarEvents();
-        
+
         // Generate ICS content
         const calendar = ical({
           name: CALENDAR_CONFIG.CALENDAR_NAME,
@@ -44,38 +44,39 @@ export function gcalPlugin(): Plugin {
             description: event.description,
           });
         }
-        
+
         // Emit ICS as asset
         this.emitFile({
-          type: 'asset',
-          fileName: 'availability.ics',
-          source: calendar.toString()
+          type: "asset",
+          fileName: "naari3-meetings.ics",
+          source: calendar.toString(),
         });
-        
+
         // Generate events.json for the web app
         const eventsData = {
-          events: events.map(event => ({
+          events: events.map((event) => ({
             summary: event.summary,
             start: event.start.toISOString(),
             end: event.end.toISOString(),
-            description: event.description
+            description: event.description,
           })),
-          generatedAt: new Date().toISOString()
+          generatedAt: new Date().toISOString(),
         };
-        
+
         // Emit events.json as asset
         this.emitFile({
-          type: 'asset',
-          fileName: 'events.json',
-          source: JSON.stringify(eventsData, null, 2)
+          type: "asset",
+          fileName: "events.json",
+          source: JSON.stringify(eventsData, null, 2),
         });
-        
-        console.log(`✅ Generated ICS and prepared ${events.length} events for web app`);
-        
+
+        console.log(
+          `✅ Generated ICS and prepared ${events.length} events for web app`
+        );
       } catch (error) {
-        console.error('❌ Failed to fetch calendar events:', error);
-        this.error('Google Calendar sync failed');
+        console.error("❌ Failed to fetch calendar events:", error);
+        this.error("Google Calendar sync failed");
       }
-    }
+    },
   };
 }

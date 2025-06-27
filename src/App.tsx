@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { CalendarEvent } from './types'
-import StatsCard from './components/StatsCard'
 import WeeklyView from './components/WeeklyView'
 import DailyView from './components/DailyView'
+import NotificationSettings from './components/NotificationSettings'
+import Button from './components/Button'
+import { useNotifications } from './hooks/useNotifications'
 
 function App() {
   const [events, setEvents] = useState<CalendarEvent[]>([])
@@ -11,6 +13,13 @@ function App() {
   const [generatedAt, setGeneratedAt] = useState<string>('')
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0)
   const [currentDayOffset, setCurrentDayOffset] = useState(0)
+  
+  const {
+    settings: notificationSettings,
+    permission: notificationPermission,
+    saveSettings: saveNotificationSettings,
+    requestPermission: requestNotificationPermission
+  } = useNotifications(events)
 
   // Get the first week with events
   const getFirstWeekWithEvents = (events: CalendarEvent[]) => {
@@ -79,8 +88,44 @@ function App() {
             {view === 'weekly' && <WeeklyView events={events} currentWeekOffset={currentWeekOffset} getFirstWeekWithEvents={getFirstWeekWithEvents} setCurrentWeekOffset={setCurrentWeekOffset} view={view} setView={setView} />}
             {view === 'daily' && <DailyView events={events} currentDayOffset={currentDayOffset} setCurrentDayOffset={setCurrentDayOffset} view={view} setView={setView} />}
             
-            {/* Stats Card */}
-            <StatsCard events={events} />
+            {/* Additional Features */}
+            <div className="bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200 p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                {/* ICS Export */}
+                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900">カレンダーエクスポート</h4>
+                      <p className="text-sm text-gray-600">ICS形式でダウンロード</p>
+                    </div>
+                    <a 
+                      href="/availability.ics" 
+                      download="availability.ics"
+                      className="inline-block"
+                    >
+                      <Button variant="secondary" onClick={() => {}}>
+                        ダウンロード
+                      </Button>
+                    </a>
+                  </div>
+                </div>
+
+                {/* Notification Settings */}
+                <NotificationSettings
+                  settings={notificationSettings}
+                  permission={notificationPermission}
+                  onSettingsChange={saveNotificationSettings}
+                  onRequestPermission={requestNotificationPermission}
+                />
+
+              </div>
+            </div>
           </div>
         )}
 

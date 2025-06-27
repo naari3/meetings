@@ -131,6 +131,20 @@ export default function WeeklyView({ events, currentWeekOffset, getFirstWeekWith
                         const topPercent = ((slotStart - slotStartTime) * 100)
                         const heightPercent = ((slotEnd - slotStart) * 100)
                         
+                        // Check for overlapping events and calculate horizontal offset
+                        const overlappingEvents = dayEvents.filter((otherEvent, otherIndex) => {
+                          if (otherIndex >= eventIndex) return false
+                          const otherStart = new Date(otherEvent.start).getTime()
+                          const otherEnd = new Date(otherEvent.end).getTime()
+                          const currentStart = eventStart.getTime()
+                          const currentEnd = eventEnd.getTime()
+                          return (currentStart < otherEnd && currentEnd > otherStart)
+                        })
+                        
+                        const overlapCount = overlappingEvents.length
+                        const leftOffset = overlapCount * 20 // 20px offset for each overlapping event
+                        const rightOffset = overlapCount * 10 // Reduce right side less to stay within bounds
+                        
                         const color = getEventColor(eventIndex)
                         return (
                           <div
@@ -138,7 +152,7 @@ export default function WeeklyView({ events, currentWeekOffset, getFirstWeekWith
                             className={`absolute left-0.5 right-0.5 md:left-3.5 md:right-3.5 rounded p-1.5 border-l-2 ${color.bg} ${color.border} z-20`}
                             style={{
                               top: `${topPercent}%`,
-                              height: `${Math.max(heightPercent, 15)}%` // Minimum 15% height for visibility
+                              height: `${Math.max(heightPercent, 15)}%`, // Minimum 15% height for visibility
                             }}
                           >
                             <p className="text-xs font-normal text-gray-900 mb-px truncate">

@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from 'fs'
 import { join } from 'path'
 
 export default defineConfig({
+  base: '/meetings/',
   plugins: [
     react(),
     {

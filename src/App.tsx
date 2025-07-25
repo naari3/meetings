@@ -36,7 +36,7 @@ function App() {
 
   useEffect(() => {
     // Load events data from events.json
-    fetch("/events.json")
+    fetch(import.meta.env.BASE_URL + "events.json")
       .then((response) => response.json())
       .then((data) => {
         setEvents(data.events || []);
@@ -131,7 +131,7 @@ function App() {
                       </p>
                     </div>
                     <a
-                      href="/naari3-meetings.ics"
+                      href={`${import.meta.env.BASE_URL}naari3-meetings.ics`}
                       download="naari3-meetings.ics"
                       className="inline-block"
                     >

@@ -1,7 +1,7 @@
 // カレンダー設定定数
 export const CALENDAR_CONFIG = {
   // Google Calendar設定
-  SCOPES: ["https://www.googleapis.com/auth/calendar"] as const,
+  SCOPES: ["https://www.googleapis.com/auth/calendar.readonly"] as const,
   PRIMARY_CALENDAR_ID: "primary",
 
   // 生成カレンダー設定

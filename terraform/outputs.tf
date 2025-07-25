@@ -1,29 +1,21 @@
 output "workload_identity_provider" {
-  description = "The full provider name to be used in GitHub Actions"
+  description = "Workload Identity Provider resource name"
   value       = google_iam_workload_identity_pool_provider.github_provider.name
 }
 
 output "service_account_email" {
-  description = "Service account email for Calendar API access"
-  value       = google_service_account.calendar_sa.email
+  description = "Service Account email"
+  value       = google_service_account.github_actions.email
 }
 
-output "project_number" {
-  description = "Google Cloud project number"
-  value       = data.google_project.project.number
-}
-
-output "project_id" {
-  description = "Google Cloud project ID"
-  value       = "naari3-calendar"
-}
-
-output "github_repository" {
-  description = "GitHub repository configured for WIF"
-  value       = "naari3/naari3-meetings"
-}
-
-output "pool_name" {
-  description = "Workload Identity Pool name"
-  value       = google_iam_workload_identity_pool.github_actions_pool.name
+output "setup_instructions" {
+  description = "Instructions for setting up GitHub Actions"
+  value = <<-EOT
+    Add the following secrets to your GitHub repository:
+    
+    - WIF_PROVIDER: ${google_iam_workload_identity_pool_provider.github_provider.name}
+    - WIF_SERVICE_ACCOUNT: ${google_service_account.github_actions.email}
+    
+    No service account keys are needed!
+  EOT
 }

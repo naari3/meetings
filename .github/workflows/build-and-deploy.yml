@@ -1,11 +1,12 @@
-name: Build and Deploy Calendar Sync
+name: Build and Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   schedule:
-    # Run every hour to update calendar data
-    - cron: '0 * * * *'
+    # 毎日午前9時（JST）に実行
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 jobs:
@@ -13,53 +14,41 @@ jobs:
     runs-on: ubuntu-latest
     
     permissions:
-      id-token: write
-      contents: read
+      contents: write
       pages: write
-    
+      id-token: write
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: latest
-        
-    - name: Install dependencies
-      run: pnpm install
-    
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
-      with:
-        workload_identity_provider: 'projects/310950921363/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
-        project_id: 'naari3-calendar'
-        
-    - name: Set up Cloud SDK
-      uses: google-github-actions/setup-gcloud@v2
-      
-    - name: Set up Application Default Credentials
-      run: |
-        # Create the ADC file for googleapis client
-        mkdir -p ~/.config/gcloud
-        gcloud auth application-default print-access-token > /dev/null
-        echo "Application Default Credentials configured"
-    
-    - name: Build with calendar data
-      run: |
-        echo "Building with fresh calendar data..."
-        pnpm build
-        
-    - name: Upload Pages artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: ./dist
-        
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - name: Build project
+        run: pnpm build
+
+      - name: Upload artifacts
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+        id: deployment

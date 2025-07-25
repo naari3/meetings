@@ -4,12 +4,22 @@ dist/
 .env
 .env.local
 
+# Google Auth
+service-account-key.json
+*-service-account.json
+credentials.json
+
 # Terraform
-terraform/.terraform/
-terraform/terraform.tfstate
-terraform/terraform.tfstate.backup
-terraform/terraform.tfvars
-terraform/*.zip
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/terraform.tfvars
+**/*.tfplan
+**/override.tf
+**/override.tf.json
+**/*_override.tf
+**/*_override.tf.json
 
 # OS
 .DS_Store

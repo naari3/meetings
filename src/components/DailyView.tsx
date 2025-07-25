@@ -15,14 +15,52 @@ export default function DailyView({ events, currentDayOffset, setCurrentDayOffse
   const currentDate = new Date(baseDate)
   currentDate.setDate(baseDate.getDate() + currentDayOffset)
   
+  const isAllDayEvent = (event: CalendarEvent) => {
+    const start = new Date(event.start);
+    const end = new Date(event.end);
+    
+    // Check if times are at midnight (00:00) in UTC
+    const startUTCHours = start.getUTCHours();
+    const startUTCMinutes = start.getUTCMinutes();
+    const startUTCSeconds = start.getUTCSeconds();
+    const endUTCHours = end.getUTCHours();
+    const endUTCMinutes = end.getUTCMinutes();
+    const endUTCSeconds = end.getUTCSeconds();
+    
+    // Event is all-day if both start and end are at midnight UTC
+    return (startUTCHours === 0 && startUTCMinutes === 0 && startUTCSeconds === 0 &&
+            endUTCHours === 0 && endUTCMinutes === 0 && endUTCSeconds === 0);
+  };
+  
   const getEventsForToday = () => {
     return events.filter(event => {
-      const eventDate = new Date(event.start)
-      return eventDate.toDateString() === currentDate.toDateString()
+      const eventStart = new Date(event.start);
+      const eventEnd = new Date(event.end);
+      
+      // For all-day events, the end date is exclusive (Google Calendar convention)
+      if (isAllDayEvent(event)) {
+        // Use local date strings for comparison to avoid timezone issues
+        const year = currentDate.getFullYear();
+        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const day = String(currentDate.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+        
+        const startStr = eventStart.toISOString().split('T')[0];
+        const endStr = eventEnd.toISOString().split('T')[0];
+        
+        // Check if date is between start (inclusive) and end (exclusive)
+        return dateStr >= startStr && dateStr < endStr;
+      } else {
+        // For timed events, use the original logic
+        const eventDate = new Date(event.start)
+        return eventDate.toDateString() === currentDate.toDateString()
+      }
     })
   }
 
-  const todayEvents = getEventsForToday().sort((a, b) => {
+  const allEvents = getEventsForToday();
+  const allDayEvents = allEvents.filter(isAllDayEvent);
+  const timedEvents = allEvents.filter(event => !isAllDayEvent(event)).sort((a, b) => {
     const aStart = new Date(a.start).getTime()
     const bStart = new Date(b.start).getTime()
     if (aStart !== bStart) return aStart - bStart
@@ -105,6 +143,29 @@ export default function DailyView({ events, currentDayOffset, setCurrentDayOffse
             </div>
           </div>
         </div>
+        
+        {/* All-day events section */}
+        {allDayEvents.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm font-medium text-gray-700">終日</span>
+            </div>
+            <div className="space-y-1">
+              {allDayEvents.map((event, index) => {
+                const color = getEventColor(index);
+                return (
+                  <div
+                    key={index}
+                    className={`rounded px-3 py-2 text-sm font-medium ${color.bg} ${color.text} border ${color.border}`}
+                  >
+                    {event.summary}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        
         <div className="relative">
           <div className="flex border-t border-gray-200 w-full relative ml-12 mt-6">
             <div className="flex flex-col w-0 relative overflow-visible">
@@ -154,7 +215,7 @@ export default function DailyView({ events, currentDayOffset, setCurrentDayOffse
               {/* Events for today */}
               {(() => {
                 // Pre-process events to assign column positions
-                const eventsWithColumns = todayEvents.map((event, eventIndex) => {
+                const eventsWithColumns = timedEvents.map((event, eventIndex) => {
                   const eventStart = new Date(event.start)
                   const eventEnd = new Date(event.end)
                   const eventStartTime = eventStart.getHours() + (eventStart.getMinutes() / 60)
@@ -267,7 +328,7 @@ export default function DailyView({ events, currentDayOffset, setCurrentDayOffse
             </div>
           </div>
           
-          {todayEvents.length === 0 && (
+          {allEvents.length === 0 && (
             <div className="text-center py-8">
               <p className="text-gray-500">今日の予定はありません</p>
             </div>

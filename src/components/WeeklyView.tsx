@@ -26,10 +26,56 @@ export default function WeeklyView({
     return day;
   });
 
+  const isAllDayEvent = (event: CalendarEvent) => {
+    const start = new Date(event.start);
+    const end = new Date(event.end);
+    
+    // Check if times are at midnight (00:00) in UTC
+    const startUTCHours = start.getUTCHours();
+    const startUTCMinutes = start.getUTCMinutes();
+    const startUTCSeconds = start.getUTCSeconds();
+    const endUTCHours = end.getUTCHours();
+    const endUTCMinutes = end.getUTCMinutes();
+    const endUTCSeconds = end.getUTCSeconds();
+    
+    // Event is all-day if both start and end are at midnight UTC
+    return (startUTCHours === 0 && startUTCMinutes === 0 && startUTCSeconds === 0 &&
+            endUTCHours === 0 && endUTCMinutes === 0 && endUTCSeconds === 0);
+  };
+
   const getEventsForDay = (date: Date) => {
     return events.filter((event) => {
-      const eventDate = new Date(event.start);
-      return eventDate.toDateString() === date.toDateString();
+      const eventStart = new Date(event.start);
+      const eventEnd = new Date(event.end);
+      
+      // For all-day events, the end date is exclusive (Google Calendar convention)
+      if (isAllDayEvent(event)) {
+        // For all-day events, we need to check if the date falls within the range
+        // Use local date strings for comparison to avoid timezone issues
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+        
+        const startStr = eventStart.toISOString().split('T')[0];
+        const endStr = eventEnd.toISOString().split('T')[0];
+        
+        // Check if date is between start (inclusive) and end (exclusive)
+        return dateStr >= startStr && dateStr < endStr;
+      } else {
+        // For timed events, use the original logic
+        const dayStart = new Date(date);
+        const dayEnd = new Date(date);
+        
+        // Set to beginning and end of day for comparison
+        dayStart.setHours(0, 0, 0, 0);
+        dayEnd.setHours(23, 59, 59, 999);
+        
+        // Event overlaps with this day if:
+        // - Event starts before or during this day AND
+        // - Event ends after or during this day
+        return eventStart <= dayEnd && eventEnd >= dayStart;
+      }
     });
   };
 
@@ -164,11 +210,31 @@ export default function WeeklyView({
         </div>
         <div className="relative flex overflow-x-auto">
           {/* Time column */}
-          <div className="flex flex-col sticky left-0 z-10">
-            {/* Header spacer */}
+          <div className="flex flex-col sticky left-0 z-10 bg-white">
+            {/* Header spacer - matches the header height */}
             <div className="px-2 py-3.5 flex flex-col items-center justify-center text-sm font-medium text-gray-900">
               <div className="text-xs font-medium mb-1 invisible">月</div>
               <div className="text-2xl font-bold invisible">99</div>
+            </div>
+            {/* All-day events spacer - matches the all-day events row height */}
+            <div className="px-2">
+              {(() => {
+                // Calculate max height needed for all-day events
+                const maxAllDayEvents = Math.max(
+                  0,
+                  ...weekDays.map(day => 
+                    getEventsForDay(day).filter(isAllDayEvent).length
+                  )
+                );
+                // Ensure minimum height even when no all-day events
+                return (
+                  <div className="pb-2 min-h-[0.5rem]">
+                    {Array.from({ length: maxAllDayEvents }, (_, i) => (
+                      <div key={i} className="h-6 mb-1"></div>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
             {/* Time slots */}
             {timeSlots.map((hour) => (
@@ -185,25 +251,70 @@ export default function WeeklyView({
 
           {/* Calendar section */}
           <div className="flex-1 min-w-0">
-            {/* Header */}
-            <div className="grid sticky top-0 z-5" style={{gridTemplateColumns: '1rem 1fr 1fr 1fr 1fr 1fr 1fr 1fr'}}>
-              {/* Left border column */}
-              <div className="w-4 border-r border-gray-200"></div>
-              {weekDays.map((day, index) => (
-                <div
-                  key={index}
-                  className={`p-3.5 flex flex-col items-center justify-center ${
-                    day.toDateString() === currentDate.toDateString()
-                      ? "text-indigo-700 bg-indigo-50 rounded-lg"
-                      : "text-gray-900"
-                  }`}
-                >
-                  <div className="text-xs font-medium mb-1">
-                    {day.toLocaleDateString("ja-JP", { weekday: "short" })}
-                  </div>
-                  <div className="text-2xl font-bold">{day.getDate()}</div>
-                </div>
-              ))}
+            {/* Header with all-day events */}
+            <div className="sticky top-0 z-5 bg-white">
+              <div className="grid" style={{gridTemplateColumns: '1rem 1fr 1fr 1fr 1fr 1fr 1fr 1fr'}}>
+                {/* Left border column */}
+                <div className="w-4 border-r border-gray-200"></div>
+                {weekDays.map((day, index) => {
+                  const dayEvents = getEventsForDay(day);
+                  const allDayEvents = dayEvents.filter(isAllDayEvent);
+                  const hasAllDayEvents = allDayEvents.length > 0;
+                  
+                  return (
+                    <div
+                      key={index}
+                      className={`${
+                        day.toDateString() === currentDate.toDateString()
+                          ? "text-indigo-700"
+                          : "text-gray-900"
+                      }`}
+                    >
+                      <div className={`p-3.5 flex flex-col items-center justify-center ${
+                        day.toDateString() === currentDate.toDateString()
+                          ? "bg-indigo-50 rounded-lg"
+                          : ""
+                      }`}>
+                        <div className="text-xs font-medium mb-1">
+                          {day.toLocaleDateString("ja-JP", { weekday: "short" })}
+                        </div>
+                        <div className="text-2xl font-bold">{day.getDate()}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {/* All-day events row */}
+              <div className="grid" style={{gridTemplateColumns: '1rem 1fr 1fr 1fr 1fr 1fr 1fr 1fr'}}>
+                {/* Left border column */}
+                <div className="w-4 border-r border-gray-200"></div>
+                {weekDays.map((day, index) => {
+                  const dayEvents = getEventsForDay(day);
+                  const allDayEvents = dayEvents.filter(isAllDayEvent);
+                  
+                  return (
+                    <div key={index} className="px-1 pb-2">
+                      {allDayEvents.map((event, eventIndex) => {
+                        const color = getEventColor(eventIndex);
+                        return (
+                          <div
+                            key={eventIndex}
+                            className={`rounded px-1.5 py-0.5 mb-1 text-xs font-medium ${color.bg} ${color.text} border ${color.border} truncate`}
+                            title={event.summary}
+                            data-debug-event-start={event.start}
+                            data-debug-event-end={event.end}
+                            data-debug-event-summary={event.summary}
+                            data-debug-day-date={day.toISOString()}
+                          >
+                            {event.summary}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Body */}
@@ -273,8 +384,11 @@ export default function WeeklyView({
 
                   {/* Events for this day */}
                   {(() => {
+                    // Filter out all-day events for time-based rendering
+                    const timedEvents = dayEvents.filter(event => !isAllDayEvent(event));
+                    
                     // Pre-process events to assign column positions
-                    const eventsWithColumns = dayEvents.map(
+                    const eventsWithColumns = timedEvents.map(
                       (event, eventIndex) => {
                         const eventStart = new Date(event.start);
                         const eventEnd = new Date(event.end);

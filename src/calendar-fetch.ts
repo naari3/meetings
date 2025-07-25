@@ -55,8 +55,11 @@ export async function fetchCalendarEvents(): Promise<CalendarEvent[]> {
 
     const calendarEvents: CalendarEvent[] = [];
     
-    // Fetch events from all configured calendar IDs
-    for (const calendarId of CALENDAR_CONFIG.CALENDAR_IDS) {
+    // Combine PUBLIC_GOOGLE_CALENDAR_IDS and GOOGLE_CALENDAR_IDS
+    const allCalendarIds = [...CALENDAR_CONFIG.PUBLIC_GOOGLE_CALENDAR_IDS, ...CALENDAR_CONFIG.CALENDAR_IDS];
+    
+    // Fetch events from all calendar IDs
+    for (const calendarId of allCalendarIds) {
       console.log(`[${new Date().toISOString()}] Fetching from calendar: ${calendarId}`);
       
       const events = await calendar.events.list({
@@ -77,11 +80,14 @@ export async function fetchCalendarEvents(): Promise<CalendarEvent[]> {
             ? new Date(event.end.dateTime)
             : new Date(event.end.date!);
 
+          // Check if this calendar should be anonymized
+          const isPublic = CALENDAR_CONFIG.PUBLIC_GOOGLE_CALENDAR_IDS.includes(calendarId);
+          
           calendarEvents.push({
-            summary: CALENDAR_CONFIG.EVENT_SUMMARY,
+            summary: isPublic && event.summary ? event.summary : CALENDAR_CONFIG.EVENT_SUMMARY,
             start: startDate,
             end: endDate,
-            description: CALENDAR_CONFIG.EVENT_DESCRIPTION,
+            description: isPublic ? (event.description || "") : CALENDAR_CONFIG.EVENT_DESCRIPTION,
           });
         }
       }

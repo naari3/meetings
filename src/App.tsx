@@ -44,7 +44,11 @@ function App() {
     fetch(import.meta.env.BASE_URL + "events.json")
       .then((response) => response.json())
       .then((data) => {
-        setEvents(data.events || []);
+        // Filter out events with "休み：" in the summary
+        const filteredEvents = (data.events || []).filter((event: CalendarEvent) => 
+          !event.summary.includes("休み：")
+        );
+        setEvents(filteredEvents);
         setGeneratedAt(data.generatedAt || "");
         setLoading(false);
       })

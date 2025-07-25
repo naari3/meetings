@@ -53,31 +53,37 @@ export async function fetchCalendarEvents(): Promise<CalendarEvent[]> {
     const futureDate = new Date();
     futureDate.setDate(now.getDate() + 28); // 4週間後
 
-    const events = await calendar.events.list({
-      calendarId: CALENDAR_CONFIG.PRIMARY_CALENDAR_ID,
-      timeMin: pastDate.toISOString(),
-      timeMax: futureDate.toISOString(),
-      maxResults: CALENDAR_CONFIG.MAX_EVENTS,
-      singleEvents: true,
-      orderBy: "startTime",
-    });
-
     const calendarEvents: CalendarEvent[] = [];
-    for (const event of events.data.items || []) {
-      if (event.start && event.end) {
-        const startDate = event.start.dateTime
-          ? new Date(event.start.dateTime)
-          : new Date(event.start.date!);
-        const endDate = event.end.dateTime
-          ? new Date(event.end.dateTime)
-          : new Date(event.end.date!);
+    
+    // Fetch events from all configured calendar IDs
+    for (const calendarId of CALENDAR_CONFIG.CALENDAR_IDS) {
+      console.log(`[${new Date().toISOString()}] Fetching from calendar: ${calendarId}`);
+      
+      const events = await calendar.events.list({
+        calendarId: calendarId,
+        timeMin: pastDate.toISOString(),
+        timeMax: futureDate.toISOString(),
+        maxResults: CALENDAR_CONFIG.MAX_EVENTS,
+        singleEvents: true,
+        orderBy: "startTime",
+      });
 
-        calendarEvents.push({
-          summary: CALENDAR_CONFIG.EVENT_SUMMARY,
-          start: startDate,
-          end: endDate,
-          description: CALENDAR_CONFIG.EVENT_DESCRIPTION,
-        });
+      for (const event of events.data.items || []) {
+        if (event.start && event.end) {
+          const startDate = event.start.dateTime
+            ? new Date(event.start.dateTime)
+            : new Date(event.start.date!);
+          const endDate = event.end.dateTime
+            ? new Date(event.end.dateTime)
+            : new Date(event.end.date!);
+
+          calendarEvents.push({
+            summary: CALENDAR_CONFIG.EVENT_SUMMARY,
+            start: startDate,
+            end: endDate,
+            description: CALENDAR_CONFIG.EVENT_DESCRIPTION,
+          });
+        }
       }
     }
 

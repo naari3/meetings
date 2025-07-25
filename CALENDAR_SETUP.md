@@ -21,14 +21,14 @@
 
 `.env` ファイルを作成：
 ```bash
-GOOGLE_CALENDAR_ID=your-calendar-id@group.calendar.google.com
+GOOGLE_CALENDAR_IDS=your-calendar-id@group.calendar.google.com
 ```
 
 ### 方法2: GitHub Variables で指定（GitHub Actions）
 
 1. リポジトリの Settings → Secrets and variables → Actions → Variables タブ
 2. 「New repository variable」をクリック
-3. Name: `GOOGLE_CALENDAR_ID`
+3. Name: `GOOGLE_CALENDAR_IDS`
 4. Value: カレンダーID（例: `your-calendar-id@group.calendar.google.com`）
 
 ### 方法3: デフォルト値を使用
@@ -44,6 +44,12 @@ GOOGLE_CALENDAR_ID=your-calendar-id@group.calendar.google.com
 3. サービスアカウントのメール（`github-actions-calendar@naari3-calendar.iam.gserviceaccount.com`）を追加
 4. 権限を「予定の表示（すべての予定の詳細）」に設定
 
-## 複数カレンダーの統合（将来の拡張）
+## 複数カレンダーの統合
 
-現在は単一カレンダーのみサポートしていますが、将来的に複数カレンダーの統合も可能です。
+複数のカレンダーを統合する場合は、カンマ区切りでカレンダーIDを指定します：
+
+```bash
+GOOGLE_CALENDAR_IDS=primary,calendar-id-1@group.calendar.google.com,calendar-id-2@group.calendar.google.com
+```
+
+各カレンダーに対してサービスアカウントへのアクセス権限の付与が必要です。

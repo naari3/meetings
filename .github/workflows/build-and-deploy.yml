@@ -42,7 +42,7 @@ jobs:
       - name: Build project
         run: pnpm build
         env:
-          GOOGLE_CALENDAR_ID: ${{ secrets.CALENDAR_ID }}
+          GOOGLE_CALENDAR_IDS: ${{ secrets.CALENDAR_IDS }}
 
       - name: Upload artifacts
         uses: actions/upload-pages-artifact@v3

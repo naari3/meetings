@@ -4,19 +4,19 @@ import Button from "./Button";
 interface WeeklyViewProps {
   events: CalendarEvent[];
   currentWeekOffset: number;
-  getFirstWeekWithEvents: (events: CalendarEvent[]) => Date;
+  getCurrentWeekStart: () => Date;
   setCurrentWeekOffset: (callback: (prev: number) => number) => void;
 }
 
 export default function WeeklyView({
   events,
   currentWeekOffset,
-  getFirstWeekWithEvents,
+  getCurrentWeekStart,
   setCurrentWeekOffset,
 }: WeeklyViewProps) {
-  const firstWeekWithEvents = getFirstWeekWithEvents(events);
-  const startOfWeek = new Date(firstWeekWithEvents);
-  startOfWeek.setDate(firstWeekWithEvents.getDate() + currentWeekOffset * 7);
+  const currentWeekStart = getCurrentWeekStart();
+  const startOfWeek = new Date(currentWeekStart);
+  startOfWeek.setDate(currentWeekStart.getDate() + currentWeekOffset * 7);
 
   const currentDate = new Date();
 
@@ -124,14 +124,7 @@ export default function WeeklyView({
               <Button
                 variant="navigation"
                 onClick={() => {
-                  const today = new Date();
-                  const startOfToday = new Date(today);
-                  startOfToday.setDate(today.getDate() - today.getDay());
-                  
-                  const firstWeek = getFirstWeekWithEvents(events);
-                  const weeksDiff = Math.floor((startOfToday.getTime() - firstWeek.getTime()) / (7 * 24 * 60 * 60 * 1000));
-                  
-                  setCurrentWeekOffset(() => weeksDiff);
+                  setCurrentWeekOffset(() => 0);
                 }}
               >
                 <svg

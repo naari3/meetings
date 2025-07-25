@@ -18,19 +18,12 @@ function App() {
     requestPermission: requestNotificationPermission,
   } = useNotifications(events);
 
-  // Get the first week with events
-  const getFirstWeekWithEvents = (events: CalendarEvent[]) => {
-    if (events.length === 0) return new Date();
-
-    const eventDates = events.map((event) => new Date(event.start));
-    const earliestDate = new Date(
-      Math.min(...eventDates.map((d) => d.getTime()))
-    );
-
-    // Get the start of the week for the earliest event
-    const startOfWeek = new Date(earliestDate);
-    startOfWeek.setDate(earliestDate.getDate() - earliestDate.getDay());
-
+  // Get the start of current week
+  const getCurrentWeekStart = () => {
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
     return startOfWeek;
   };
 
@@ -97,7 +90,7 @@ function App() {
             <WeeklyView
               events={events}
               currentWeekOffset={currentWeekOffset}
-              getFirstWeekWithEvents={getFirstWeekWithEvents}
+              getCurrentWeekStart={getCurrentWeekStart}
               setCurrentWeekOffset={setCurrentWeekOffset}
             />
 

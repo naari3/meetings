@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { CalendarEvent } from "./types";
 import WeeklyView from "./components/WeeklyView";
+import DailyView from "./components/DailyView";
 import NotificationSettings from "./components/NotificationSettings";
 import Button from "./components/Button";
 import { useNotifications } from "./hooks/useNotifications";
@@ -10,6 +11,8 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [generatedAt, setGeneratedAt] = useState<string>("");
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
+  const [currentDayOffset, setCurrentDayOffset] = useState(0);
+  const [view, setView] = useState<"weekly" | "daily">("weekly");
 
   const {
     settings: notificationSettings,
@@ -28,6 +31,15 @@ function App() {
   };
 
   useEffect(() => {
+    // Check if mobile on mount and window resize
+    const checkMobile = () => {
+      const isMobile = window.innerWidth < 640; // Tailwind's sm breakpoint
+      setView(isMobile ? "daily" : "weekly");
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
     // Load events data from events.json
     fetch(import.meta.env.BASE_URL + "events.json")
       .then((response) => response.json())
@@ -40,6 +52,8 @@ function App() {
         console.error("Failed to load events:", error);
         setLoading(false);
       });
+
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   if (loading) {
@@ -87,12 +101,22 @@ function App() {
           </div>
         ) : (
           <div className="space-y-12">
-            <WeeklyView
-              events={events}
-              currentWeekOffset={currentWeekOffset}
-              getCurrentWeekStart={getCurrentWeekStart}
-              setCurrentWeekOffset={setCurrentWeekOffset}
-            />
+            {view === "weekly" ? (
+              <WeeklyView
+                events={events}
+                currentWeekOffset={currentWeekOffset}
+                getCurrentWeekStart={getCurrentWeekStart}
+                setCurrentWeekOffset={setCurrentWeekOffset}
+              />
+            ) : (
+              <DailyView
+                events={events}
+                currentDayOffset={currentDayOffset}
+                setCurrentDayOffset={setCurrentDayOffset}
+                view={view}
+                setView={setView}
+              />
+            )}
 
             {/* Additional Features */}
             <div className="bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200 p-6">

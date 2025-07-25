@@ -83,6 +83,11 @@ export async function fetchCalendarEvents(): Promise<CalendarEvent[]> {
 
       for (const event of events.data.items || []) {
         if (event.start && event.end) {
+          // Apply filtering before anonymization
+          if (event.summary && (event.summary.includes("休み：") || event.summary.includes("自宅"))) {
+            continue; // Skip this event
+          }
+
           const startDate = event.start.dateTime
             ? new Date(event.start.dateTime)
             : new Date(event.start.date!);

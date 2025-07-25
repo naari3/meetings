@@ -44,11 +44,7 @@ function App() {
     fetch(import.meta.env.BASE_URL + "events.json")
       .then((response) => response.json())
       .then((data) => {
-        // Filter out events with "休み：" or "自宅" in the summary
-        const filteredEvents = (data.events || []).filter((event: CalendarEvent) => 
-          !event.summary.includes("休み：") && !event.summary.includes("自宅")
-        );
-        setEvents(filteredEvents);
+        setEvents(data.events || []);
         setGeneratedAt(data.generatedAt || "");
         setLoading(false);
       })

@@ -18,21 +18,25 @@ async function getAuthClient() {
     authOptions.keyFile = process.env.GOOGLE_APPLICATION_CREDENTIALS;
   }
   // OAuth2クライアント認証情報がある場合
-  else if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN) {
+  else if (
+    process.env.GOOGLE_CLIENT_ID &&
+    process.env.GOOGLE_CLIENT_SECRET &&
+    process.env.GOOGLE_REFRESH_TOKEN
+  ) {
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      'urn:ietf:wg:oauth:2.0:oob'
+      "urn:ietf:wg:oauth:2.0:oob"
     );
-    
+
     oauth2Client.setCredentials({
-      refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+      refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
     });
-    
+
     return oauth2Client;
   }
   // デフォルトはADC
-  
+
   const auth = new google.auth.GoogleAuth(authOptions);
   return auth;
 }
@@ -54,14 +58,20 @@ export async function fetchCalendarEvents(): Promise<CalendarEvent[]> {
     futureDate.setDate(now.getDate() + 28); // 4週間後
 
     const calendarEvents: CalendarEvent[] = [];
-    
+
     // Combine PUBLIC_GOOGLE_CALENDAR_IDS and GOOGLE_CALENDAR_IDS
-    const allCalendarIds = [...CALENDAR_CONFIG.PUBLIC_GOOGLE_CALENDAR_IDS, ...CALENDAR_CONFIG.CALENDAR_IDS];
-    
+    const allCalendarIds = [
+      ...CALENDAR_CONFIG.PUBLIC_GOOGLE_CALENDAR_IDS,
+      ...CALENDAR_CONFIG.CALENDAR_IDS,
+    ];
+    console.log(allCalendarIds);
+
     // Fetch events from all calendar IDs
     for (const calendarId of allCalendarIds) {
-      console.log(`[${new Date().toISOString()}] Fetching from calendar: ${calendarId}`);
-      
+      console.log(
+        `[${new Date().toISOString()}] Fetching from calendar: ${calendarId}`
+      );
+
       const events = await calendar.events.list({
         calendarId: calendarId,
         timeMin: pastDate.toISOString(),
@@ -81,13 +91,19 @@ export async function fetchCalendarEvents(): Promise<CalendarEvent[]> {
             : new Date(event.end.date!);
 
           // Check if this calendar should be anonymized
-          const isPublic = CALENDAR_CONFIG.PUBLIC_GOOGLE_CALENDAR_IDS.includes(calendarId);
-          
+          const isPublic =
+            CALENDAR_CONFIG.PUBLIC_GOOGLE_CALENDAR_IDS.includes(calendarId);
+
           calendarEvents.push({
-            summary: isPublic && event.summary ? event.summary : CALENDAR_CONFIG.EVENT_SUMMARY,
+            summary:
+              isPublic && event.summary
+                ? event.summary
+                : CALENDAR_CONFIG.EVENT_SUMMARY,
             start: startDate,
             end: endDate,
-            description: isPublic ? (event.description || "") : CALENDAR_CONFIG.EVENT_DESCRIPTION,
+            description: isPublic
+              ? event.description || ""
+              : CALENDAR_CONFIG.EVENT_DESCRIPTION,
           });
         }
       }

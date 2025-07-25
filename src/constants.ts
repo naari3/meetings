@@ -2,8 +2,8 @@
 export const CALENDAR_CONFIG = {
   // Google Calendar設定
   SCOPES: ["https://www.googleapis.com/auth/calendar.readonly"] as const,
-  CALENDAR_IDS: process.env.GOOGLE_CALENDAR_IDS 
-    ? process.env.GOOGLE_CALENDAR_IDS.split(",").map(id => id.trim()).filter(id => id)
+  CALENDAR_IDS: (process.env.GOOGLE_CALENDAR_IDS || process.env.PUBLIC_GOOGLE_CALENDAR_IDS)
+    ? (process.env.GOOGLE_CALENDAR_IDS || "").split(",").map(id => id.trim()).filter(id => id)
     : ["primary"],
   
   // 匿名化しないカレンダーのリスト（カンマ区切り）

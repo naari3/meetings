@@ -2,7 +2,7 @@
 export const CALENDAR_CONFIG = {
   // Google Calendar設定
   SCOPES: ["https://www.googleapis.com/auth/calendar.readonly"] as const,
-  PRIMARY_CALENDAR_ID: "primary",
+  PRIMARY_CALENDAR_ID: process.env.GOOGLE_CALENDAR_ID || "primary",
 
   // 生成カレンダー設定
   CALENDAR_NAME: "なありみーてぃんぐ",

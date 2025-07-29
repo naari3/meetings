@@ -95,21 +95,41 @@ export default function NotificationSettings({
           </div>
 
           {settings.enabled && (
-            <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                通知タイミング
-              </label>
-              <select
-                value={settings.minutes}
-                onChange={(e) => handleMinutesChange(Number(e.target.value))}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white"
-              >
-                <option value={5}>5分前</option>
-                <option value={10}>10分前</option>
-                <option value={15}>15分前</option>
-                <option value={30}>30分前</option>
-                <option value={60}>1時間前</option>
-              </select>
+            <div className="bg-blue-50 rounded-lg p-3 border border-blue-200 space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  通知タイミング
+                </label>
+                <select
+                  value={settings.minutes}
+                  onChange={(e) => handleMinutesChange(Number(e.target.value))}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white"
+                >
+                  <option value={5}>5分前</option>
+                  <option value={10}>10分前</option>
+                  <option value={15}>15分前</option>
+                  <option value={30}>30分前</option>
+                  <option value={60}>1時間前</option>
+                </select>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-gray-700">
+                  予定開始時刻にも通知する
+                </label>
+                <button
+                  onClick={() => onSettingsChange({ ...settings, enableStartTime: !settings.enableStartTime })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    settings.enableStartTime ? 'bg-blue-600' : 'bg-gray-200'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.enableStartTime ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
           )}
 

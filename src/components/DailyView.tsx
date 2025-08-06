@@ -67,7 +67,7 @@ export default function DailyView({ events, currentDayOffset, setCurrentDayOffse
     // If start times are equal, sort by end time
     return new Date(a.end).getTime() - new Date(b.end).getTime()
   })
-  const timeSlots = Array.from({ length: 9 }, (_, i) => i + 10) // 10AM to 6PM
+  const timeSlots = Array.from({ length: 13 }, (_, i) => i + 10) // 10AM to 10PM
 
   const getEventColor = (index: number) => {
     const colors = [
@@ -195,9 +195,9 @@ export default function DailyView({ events, currentDayOffset, setCurrentDayOffse
                 const currentMinutes = new Date().getMinutes()
                 const currentTimeHour = currentHour + (currentMinutes / 60)
                 const dayStartTime = timeSlots[0] // 10
-                const dayEndTime = timeSlots[timeSlots.length - 1] + 1 // 19
+                const dayEndTime = timeSlots[timeSlots.length - 1] + 1 // 23
                 const currentTimePercent = ((currentTimeHour - dayStartTime) / (dayEndTime - dayStartTime)) * 100
-                const showCurrentTimeLine = currentHour >= 10 && currentHour <= 18
+                const showCurrentTimeLine = currentHour >= 10 && currentHour <= 22
                 
                 return showCurrentTimeLine && (
                   <div 

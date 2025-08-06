@@ -79,7 +79,7 @@ export default function WeeklyView({
     });
   };
 
-  const timeSlots = Array.from({ length: 9 }, (_, i) => i + 10); // 10AM to 6PM
+  const timeSlots = Array.from({ length: 13 }, (_, i) => i + 10); // 10AM to 10PM
 
   const getEventColor = (index: number) => {
     const colors = [
@@ -345,13 +345,13 @@ export default function WeeklyView({
               // Calculate current time position as percentage
               const currentTimeHour = currentHour + currentMinutes / 60;
               const dayStartTime = timeSlots[0]; // 10
-              const dayEndTime = timeSlots[timeSlots.length - 1] + 1; // 19
+              const dayEndTime = timeSlots[timeSlots.length - 1] + 1; // 23
               const currentTimePercent =
                 ((currentTimeHour - dayStartTime) /
                   (dayEndTime - dayStartTime)) *
                 100;
               const showCurrentTimeLine =
-                isToday && currentHour >= 10 && currentHour <= 18;
+                isToday && currentHour >= 10 && currentHour <= 22;
 
               return (
                 <div key={dayIndex} className="relative">

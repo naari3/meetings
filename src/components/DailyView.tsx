@@ -1,6 +1,7 @@
 import { CalendarEvent } from '../types'
 import Button from './Button'
 import ViewToggle from './ViewToggle'
+import { useCurrentTime } from '../hooks/useCurrentTime'
 
 interface DailyViewProps {
   events: CalendarEvent[]
@@ -14,6 +15,7 @@ export default function DailyView({ events, currentDayOffset, setCurrentDayOffse
   const baseDate = new Date()
   const currentDate = new Date(baseDate)
   currentDate.setDate(baseDate.getDate() + currentDayOffset)
+  const { currentHour, currentMinutes } = useCurrentTime()
   
   const isAllDayEvent = (event: CalendarEvent) => {
     const start = new Date(event.start);
@@ -191,8 +193,6 @@ export default function DailyView({ events, currentDayOffset, setCurrentDayOffse
               
               {/* Current time line */}
               {(() => {
-                const currentHour = new Date().getHours()
-                const currentMinutes = new Date().getMinutes()
                 const currentTimeHour = currentHour + (currentMinutes / 60)
                 const dayStartTime = timeSlots[0] // 10
                 const dayEndTime = timeSlots[timeSlots.length - 1] + 1 // 23

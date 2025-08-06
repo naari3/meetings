@@ -1,5 +1,6 @@
 import { CalendarEvent } from "../types";
 import Button from "./Button";
+import { useCurrentTime } from "../hooks/useCurrentTime";
 
 interface WeeklyViewProps {
   events: CalendarEvent[];
@@ -19,6 +20,7 @@ export default function WeeklyView({
   startOfWeek.setDate(currentWeekStart.getDate() + currentWeekOffset * 7);
 
   const currentDate = new Date();
+  const { currentHour, currentMinutes } = useCurrentTime();
 
   const weekDays = Array.from({ length: 7 }, (_, i) => {
     const day = new Date(startOfWeek);
@@ -339,8 +341,6 @@ export default function WeeklyView({
                 return new Date(a.end).getTime() - new Date(b.end).getTime();
               });
               const isToday = day.toDateString() === currentDate.toDateString();
-              const currentHour = new Date().getHours();
-              const currentMinutes = new Date().getMinutes();
 
               // Calculate current time position as percentage
               const currentTimeHour = currentHour + currentMinutes / 60;

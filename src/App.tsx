@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Button from "./components/Button";
 import DailyView from "./components/DailyView";
 import NotificationSettings from "./components/NotificationSettings";
@@ -31,7 +31,7 @@ function App() {
 	};
 
 	// Function to fetch events data
-	const fetchEvents = () => {
+	const fetchEvents = useCallback(() => {
 		// Add timestamp to prevent caching
 		const timestamp = Date.now();
 		fetch(`${import.meta.env.BASE_URL}events.json?t=${timestamp}`)
@@ -45,7 +45,7 @@ function App() {
 				console.error("Failed to load events:", error);
 				setLoading(false);
 			});
-	};
+	}, []);
 
 	useEffect(() => {
 		// Check if mobile on mount and window resize
@@ -69,7 +69,7 @@ function App() {
 			window.removeEventListener("resize", checkMobile);
 			clearInterval(intervalId);
 		};
-	}, []);
+	}, [fetchEvents]);
 
 	if (loading) {
 		return (

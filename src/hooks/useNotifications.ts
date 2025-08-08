@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { CalendarEvent } from "../types";
 
 export interface NotificationSettings {
@@ -16,6 +16,7 @@ export const useNotifications = (events: CalendarEvent[]) => {
 	const [permission, setPermission] = useState<NotificationPermission>(
 		typeof Notification !== "undefined" ? Notification.permission : "default",
 	);
+	const scheduledTimers = useRef<NodeJS.Timeout[]>([]);
 
 	useEffect(() => {
 		const savedSettings = localStorage.getItem("notificationSettings");
@@ -47,6 +48,10 @@ export const useNotifications = (events: CalendarEvent[]) => {
 	}, []);
 
 	const scheduleNotifications = useCallback(() => {
+		// 既存のタイマーをすべてクリア
+		scheduledTimers.current.forEach((timer) => clearTimeout(timer));
+		scheduledTimers.current = [];
+
 		if (!settings.enabled || permission !== "granted") return;
 
 		const now = new Date();
@@ -71,7 +76,7 @@ export const useNotifications = (events: CalendarEvent[]) => {
 				timeUntilNotification > 0 &&
 				timeUntilNotification <= 24 * 60 * 60 * 1000
 			) {
-				setTimeout(() => {
+				const timerId = setTimeout(() => {
 					new Notification("予定のお知らせ", {
 						body: `${settings.minutes}分後に「${event.summary}」が始まります`,
 						icon: "/favicon.ico",
@@ -79,13 +84,14 @@ export const useNotifications = (events: CalendarEvent[]) => {
 						requireInteraction: false,
 					});
 				}, timeUntilNotification);
+				scheduledTimers.current.push(timerId);
 			}
 
 			// 開始時刻通知
 			if (settings.enableStartTime) {
 				const timeUntilStart = eventStart.getTime() - now.getTime();
 				if (timeUntilStart > 0 && timeUntilStart <= 24 * 60 * 60 * 1000) {
-					setTimeout(() => {
+					const timerId = setTimeout(() => {
 						new Notification("予定開始のお知らせ", {
 							body: `「${event.summary}」が始まりました`,
 							icon: "/favicon.ico",
@@ -93,6 +99,7 @@ export const useNotifications = (events: CalendarEvent[]) => {
 							requireInteraction: false,
 						});
 					}, timeUntilStart);
+					scheduledTimers.current.push(timerId);
 				}
 			}
 		});
@@ -102,6 +109,12 @@ export const useNotifications = (events: CalendarEvent[]) => {
 		if (settings.enabled && permission === "granted") {
 			scheduleNotifications();
 		}
+		
+		// クリーンアップ: コンポーネントのアンマウント時にタイマーをクリア
+		return () => {
+			scheduledTimers.current.forEach((timer) => clearTimeout(timer));
+			scheduledTimers.current = [];
+		};
 	}, [settings, permission, scheduleNotifications]);
 
 	return {

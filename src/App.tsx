@@ -30,18 +30,11 @@ function App() {
 		return startOfWeek;
 	};
 
-	useEffect(() => {
-		// Check if mobile on mount and window resize
-		const checkMobile = () => {
-			const isMobile = window.innerWidth < 640; // Tailwind's sm breakpoint
-			setView(isMobile ? "daily" : "weekly");
-		};
-
-		checkMobile();
-		window.addEventListener("resize", checkMobile);
-
-		// Load events data from events.json
-		fetch(`${import.meta.env.BASE_URL}events.json`)
+	// Function to fetch events data
+	const fetchEvents = () => {
+		// Add timestamp to prevent caching
+		const timestamp = Date.now();
+		fetch(`${import.meta.env.BASE_URL}events.json?t=${timestamp}`)
 			.then((response) => response.json())
 			.then((data) => {
 				setEvents(data.events || []);
@@ -52,8 +45,30 @@ function App() {
 				console.error("Failed to load events:", error);
 				setLoading(false);
 			});
+	};
 
-		return () => window.removeEventListener("resize", checkMobile);
+	useEffect(() => {
+		// Check if mobile on mount and window resize
+		const checkMobile = () => {
+			const isMobile = window.innerWidth < 640; // Tailwind's sm breakpoint
+			setView(isMobile ? "daily" : "weekly");
+		};
+
+		checkMobile();
+		window.addEventListener("resize", checkMobile);
+
+		// Initial load
+		fetchEvents();
+
+		// Set up auto-reload every 10 minutes (600000ms)
+		const intervalId = setInterval(() => {
+			fetchEvents();
+		}, 600000);
+
+		return () => {
+			window.removeEventListener("resize", checkMobile);
+			clearInterval(intervalId);
+		};
 	}, []);
 
 	if (loading) {

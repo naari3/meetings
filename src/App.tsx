@@ -73,7 +73,7 @@ function App() {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+			<div className="flex items-center justify-center min-h-screen">
 				<div className="text-center">
 					<div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 dark:border-blue-400 border-t-transparent mx-auto mb-6"></div>
 					<div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg px-6 py-3">
@@ -87,7 +87,7 @@ function App() {
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+		<div className="min-h-screen">
 			<div className="container mx-auto px-4 py-8 max-w-7xl">
 				{/* Content */}
 				{events.length === 0 ? (

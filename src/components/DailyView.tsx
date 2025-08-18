@@ -89,16 +89,24 @@ export default function DailyView({
 	const getEventColor = (index: number) => {
 		const colors = [
 			{
-				bg: "bg-purple-50",
-				border: "border-purple-600",
-				text: "text-purple-600",
+				bg: "bg-purple-50 dark:bg-purple-950",
+				border: "border-purple-600 dark:border-purple-400",
+				text: "text-purple-600 dark:text-purple-300",
 			},
-			{ bg: "bg-green-50", border: "border-green-600", text: "text-green-600" },
-			{ bg: "bg-blue-50", border: "border-blue-600", text: "text-blue-600" },
+			{ 
+				bg: "bg-green-50 dark:bg-green-950", 
+				border: "border-green-600 dark:border-green-400", 
+				text: "text-green-600 dark:text-green-300" 
+			},
+			{ 
+				bg: "bg-blue-50 dark:bg-blue-950", 
+				border: "border-blue-600 dark:border-blue-400", 
+				text: "text-blue-600 dark:text-blue-300" 
+			},
 			{
-				bg: "bg-yellow-50",
-				border: "border-yellow-600",
-				text: "text-yellow-600",
+				bg: "bg-yellow-50 dark:bg-yellow-950",
+				border: "border-yellow-600 dark:border-yellow-400",
+				text: "text-yellow-600 dark:text-yellow-300",
 			},
 		];
 		return colors[index % colors.length];
@@ -273,8 +281,8 @@ export default function DailyView({
 												top: `${Math.max(0, Math.min(100, currentTimePercent))}%`,
 											}}
 										>
-											<div className="w-2 h-2 bg-blue-500 rounded-full -ml-1"></div>
-											<div className="flex-1 border-t-2 border-blue-500"></div>
+											<div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full -ml-1"></div>
+											<div className="flex-1 border-t-2 border-blue-500 dark:border-blue-400"></div>
 										</div>
 									)
 								);
@@ -407,7 +415,7 @@ export default function DailyView({
 
 												if (durationMinutes <= 30) {
 													return (
-														<p className="text-xs font-normal text-gray-900 whitespace-nowrap overflow-hidden">
+														<p className="text-xs font-normal text-gray-900 dark:text-white whitespace-nowrap overflow-hidden">
 															{event.summary}{" "}
 															<span className={`font-semibold ${color.text}`}>
 																{timeString}
@@ -417,7 +425,7 @@ export default function DailyView({
 												} else {
 													return (
 														<>
-															<p className="text-xs font-normal text-gray-900 mb-px whitespace-nowrap overflow-hidden">
+															<p className="text-xs font-normal text-gray-900 dark:text-white mb-px whitespace-nowrap overflow-hidden">
 																{event.summary}
 															</p>
 															<p

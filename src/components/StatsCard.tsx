@@ -262,7 +262,7 @@ export default function StatsCard({ events }: StatsCardProps) {
 								>
 									<div className="flex items-center justify-between">
 										<div className="flex items-center space-x-3">
-											<div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+											<div className="w-3 h-3 bg-blue-500 dark:bg-blue-400 rounded-full"></div>
 											<span className="font-medium text-gray-900 dark:text-white">
 												{event.title}
 											</span>

@@ -1,6 +1,7 @@
 import { useCurrentTime } from "../hooks/useCurrentTime";
 import type { CalendarEvent } from "../types";
 import Button from "./Button";
+import DarkModeToggle from "./DarkModeToggle";
 
 interface WeeklyViewProps {
 	events: CalendarEvent[];
@@ -116,7 +117,7 @@ export default function WeeklyView({
 	};
 
 	return (
-		<section className="relative bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200 py-8">
+		<section className="relative bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-gray-700 py-8">
 			<div className="w-full max-w-7xl mx-auto px-6 lg:px-8 overflow-x-auto">
 				<div className="flex flex-col md:flex-row max-md:gap-3 items-center justify-between mb-5">
 					<div className="flex items-center gap-4">
@@ -133,7 +134,7 @@ export default function WeeklyView({
 								fill="#111827"
 							/>
 						</svg>
-						<h6 className="text-xl leading-8 font-semibold text-gray-900">
+						<h6 className="text-xl leading-8 font-semibold text-gray-900 dark:text-white">
 							{(() => {
 								const endOfWeek = new Date(
 									startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000,
@@ -155,8 +156,14 @@ export default function WeeklyView({
 								}
 							})()}
 						</h6>
+						<div className="md:hidden">
+							<DarkModeToggle />
+						</div>
 					</div>
 					<div className="flex items-center gap-4">
+						<div className="hidden md:block">
+							<DarkModeToggle />
+						</div>
 						<div className="flex items-center gap-2 p-1">
 							<Button
 								variant="navigation"
@@ -164,7 +171,7 @@ export default function WeeklyView({
 							>
 								<svg
 									aria-hidden="true"
-									className="w-5 h-5 text-gray-600"
+									className="w-5 h-5 text-gray-600 dark:text-gray-400"
 									fill="none"
 									stroke="currentColor"
 									viewBox="0 0 24 24"
@@ -185,7 +192,7 @@ export default function WeeklyView({
 							>
 								<svg
 									aria-hidden="true"
-									className="w-5 h-5 text-gray-600"
+									className="w-5 h-5 text-gray-600 dark:text-gray-400"
 									fill="none"
 									stroke="currentColor"
 									viewBox="0 0 24 24"
@@ -204,7 +211,7 @@ export default function WeeklyView({
 							>
 								<svg
 									aria-hidden="true"
-									className="w-5 h-5 text-gray-600"
+									className="w-5 h-5 text-gray-600 dark:text-gray-400"
 									fill="none"
 									stroke="currentColor"
 									viewBox="0 0 24 24"
@@ -222,9 +229,9 @@ export default function WeeklyView({
 				</div>
 				<div className="relative flex overflow-x-auto">
 					{/* Time column */}
-					<div className="flex flex-col sticky left-0 z-10 bg-white">
+					<div className="flex flex-col sticky left-0 z-10 bg-white dark:bg-gray-800">
 						{/* Header spacer - matches the header height */}
-						<div className="px-2 py-3.5 flex flex-col items-center justify-center text-sm font-medium text-gray-900">
+						<div className="px-2 py-3.5 flex flex-col items-center justify-center text-sm font-medium text-gray-900 dark:text-white">
 							<div className="text-xs font-medium mb-1 invisible">月</div>
 							<div className="text-2xl font-bold invisible">99</div>
 						</div>
@@ -251,7 +258,7 @@ export default function WeeklyView({
 						{/* Time slots */}
 						{timeSlots.map((hour) => (
 							<div key={hour} className="h-16 lg:h-14 relative">
-								<span className="absolute left-2 top-0 -mt-2 text-xs font-medium text-gray-500 whitespace-nowrap z-10">
+								<span className="absolute left-2 top-0 -mt-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap z-10">
 									{`${String(hour).padStart(2, "0")}:00`}
 								</span>
 							</div>
@@ -261,7 +268,7 @@ export default function WeeklyView({
 					{/* Calendar section */}
 					<div className="flex-1 min-w-0">
 						{/* Header with all-day events */}
-						<div className="sticky top-0 z-5 bg-white">
+						<div className="sticky top-0 z-5 bg-white dark:bg-gray-800">
 							<div
 								className="grid"
 								style={{
@@ -269,7 +276,7 @@ export default function WeeklyView({
 								}}
 							>
 								{/* Left border column */}
-								<div className="w-4 border-r border-gray-200"></div>
+								<div className="w-4 border-r border-gray-200 dark:border-gray-700"></div>
 								{weekDays.map((day, index) => {
 									const dayEvents = getEventsForDay(day);
 									const allDayEvents = dayEvents.filter(isAllDayEvent);
@@ -280,14 +287,14 @@ export default function WeeklyView({
 											key={index}
 											className={`${
 												day.toDateString() === currentDate.toDateString()
-													? "text-indigo-700"
-													: "text-gray-900"
+													? "text-indigo-700 dark:text-indigo-300"
+													: "text-gray-900 dark:text-white"
 											}`}
 										>
 											<div
 												className={`p-3.5 flex flex-col items-center justify-center ${
 													day.toDateString() === currentDate.toDateString()
-														? "bg-indigo-50 rounded-lg"
+														? "bg-indigo-50 dark:bg-indigo-900/30 rounded-lg"
 														: ""
 												}`}
 											>
@@ -313,7 +320,7 @@ export default function WeeklyView({
 								}}
 							>
 								{/* Left border column */}
-								<div className="w-4 border-r border-gray-200"></div>
+								<div className="w-4 border-r border-gray-200 dark:border-gray-700"></div>
 								{weekDays.map((day, index) => {
 									const dayEvents = getEventsForDay(day);
 									const allDayEvents = dayEvents.filter(isAllDayEvent);
@@ -354,7 +361,7 @@ export default function WeeklyView({
 								{timeSlots.map((hour) => (
 									<div
 										key={hour}
-										className="h-16 lg:h-14 border-t border-r border-gray-200"
+										className="h-16 lg:h-14 border-t border-r border-gray-200 dark:border-gray-700"
 									></div>
 								))}
 							</div>
@@ -388,7 +395,7 @@ export default function WeeklyView({
 											{timeSlots.map((hour) => (
 												<div
 													key={hour}
-													className={`h-16 lg:h-14 p-0.5 md:p-3.5 border-t border-gray-200 relative ${dayIndex < 6 ? "border-r" : ""}`}
+													className={`h-16 lg:h-14 p-0.5 md:p-3.5 border-t border-gray-200 dark:border-gray-700 relative ${dayIndex < 6 ? "border-r dark:border-r-gray-700" : ""}`}
 												></div>
 											))}
 										</div>
@@ -581,7 +588,7 @@ export default function WeeklyView({
 						{timeSlots.map((hour) => (
 							<div
 								key={hour}
-								className="w-20 h-20 p-2 flex items-end text-xs font-semibold text-gray-400 border-b border-r border-gray-200"
+								className="w-20 h-20 p-2 flex items-end text-xs font-semibold text-gray-400 dark:text-gray-500 border-b border-r border-gray-200 dark:border-gray-700"
 							>
 								{`${String(hour).padStart(2, "0")}:00`}
 							</div>
@@ -597,7 +604,7 @@ export default function WeeklyView({
 							return (
 								<div
 									key={hour}
-									className="w-full h-20 border-b border-gray-200 p-1.5"
+									className="w-full h-20 border-b border-gray-200 dark:border-gray-700 p-1.5"
 								>
 									{hourEvents.map((event, eventIndex) => {
 										const color = getEventColor(eventIndex);

@@ -22,16 +22,16 @@ export default function Button({
 
 	const variantStyles = {
 		navigation:
-			"p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 focus:ring-blue-500",
+			"p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-blue-500",
 		viewToggle: `px-3 py-2 rounded-lg text-sm ${
 			active
 				? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm hover:from-blue-600 hover:to-blue-700"
-				: "text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-gray-200 shadow-sm"
+				: "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 shadow-sm"
 		} focus:ring-blue-500`,
 		primary: `px-4 py-2 rounded-lg text-sm shadow-sm border ${
 			active
 				? "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-blue-600"
-				: "bg-white hover:bg-gray-50 text-gray-700 border-gray-200 hover:border-gray-300"
+				: "bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
 		} focus:ring-blue-500`,
 		secondary:
 			"px-4 py-2 rounded-lg text-sm bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-sm border border-green-600 focus:ring-green-500",

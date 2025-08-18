@@ -1,6 +1,7 @@
 import { useCurrentTime } from "../hooks/useCurrentTime";
 import type { CalendarEvent } from "../types";
 import Button from "./Button";
+import DarkModeToggle from "./DarkModeToggle";
 import ViewToggle from "./ViewToggle";
 
 interface DailyViewProps {
@@ -104,7 +105,7 @@ export default function DailyView({
 	};
 
 	return (
-		<section className="relative bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200 py-8">
+		<section className="relative bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-gray-700 py-8">
 			<div className="w-full max-w-7xl mx-auto px-6 lg:px-8 overflow-x-auto">
 				<div className="flex flex-col md:flex-row max-md:gap-3 items-center justify-between mb-5">
 					<div className="flex items-center gap-4">
@@ -121,15 +122,21 @@ export default function DailyView({
 								fill="#111827"
 							/>
 						</svg>
-						<h6 className="text-xl leading-8 font-semibold text-gray-900">
+						<h6 className="text-xl leading-8 font-semibold text-gray-900 dark:text-white">
 							{currentDate.toLocaleDateString("ja-JP", {
 								year: "numeric",
 								month: "long",
 								day: "numeric",
 							})}
 						</h6>
+						<div className="md:hidden">
+							<DarkModeToggle />
+						</div>
 					</div>
 					<div className="flex items-center gap-4">
+						<div className="hidden md:block">
+							<DarkModeToggle />
+						</div>
 						<div className="hidden sm:block">
 							<ViewToggle view={view} setView={setView} />
 						</div>
@@ -141,7 +148,7 @@ export default function DailyView({
 							>
 								<svg
 									aria-hidden="true"
-									className="w-5 h-5 text-gray-600"
+									className="w-5 h-5 text-gray-600 dark:text-gray-400"
 									fill="none"
 									stroke="currentColor"
 									viewBox="0 0 24 24"
@@ -160,7 +167,7 @@ export default function DailyView({
 							>
 								<svg
 									aria-hidden="true"
-									className="w-5 h-5 text-gray-600"
+									className="w-5 h-5 text-gray-600 dark:text-gray-400"
 									fill="none"
 									stroke="currentColor"
 									viewBox="0 0 24 24"
@@ -179,7 +186,7 @@ export default function DailyView({
 							>
 								<svg
 									aria-hidden="true"
-									className="w-5 h-5 text-gray-600"
+									className="w-5 h-5 text-gray-600 dark:text-gray-400"
 									fill="none"
 									stroke="currentColor"
 									viewBox="0 0 24 24"
@@ -200,7 +207,9 @@ export default function DailyView({
 				{allDayEvents.length > 0 && (
 					<div className="mb-4">
 						<div className="flex items-center gap-2 mb-2">
-							<span className="text-sm font-medium text-gray-700">終日</span>
+							<span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+								終日
+							</span>
 						</div>
 						<div className="space-y-1">
 							{allDayEvents.map((event, index) => {
@@ -219,14 +228,14 @@ export default function DailyView({
 				)}
 
 				<div className="relative">
-					<div className="flex border-t border-gray-200 w-full relative ml-12 mt-6">
+					<div className="flex border-t border-gray-200 dark:border-gray-700 w-full relative ml-12 mt-6">
 						<div className="flex flex-col w-0 relative overflow-visible">
 							{timeSlots.map((hour) => (
 								<div
 									key={hour}
-									className="h-16 lg:h-14 border-b border-r border-gray-200 relative"
+									className="h-16 lg:h-14 border-b border-r border-gray-200 dark:border-gray-700 relative"
 								>
-									<span className="absolute -left-12 top-0 -mt-2 text-xs font-medium text-gray-500 whitespace-nowrap z-10">
+									<span className="absolute -left-12 top-0 -mt-2 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap z-10">
 										{`${String(hour).padStart(2, "0")}:00`}
 									</span>
 								</div>
@@ -239,7 +248,7 @@ export default function DailyView({
 								{timeSlots.map((hour) => (
 									<div
 										key={hour}
-										className="w-full h-16 lg:h-14 border-b border-gray-200"
+										className="w-full h-16 lg:h-14 border-b border-gray-200 dark:border-gray-700"
 									/>
 								))}
 							</div>
@@ -429,7 +438,9 @@ export default function DailyView({
 
 					{allEvents.length === 0 && (
 						<div className="text-center py-8">
-							<p className="text-gray-500">今日の予定はありません</p>
+							<p className="text-gray-500 dark:text-gray-400">
+								今日の予定はありません
+							</p>
 						</div>
 					)}
 				</div>

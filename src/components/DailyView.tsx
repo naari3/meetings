@@ -84,7 +84,48 @@ export default function DailyView({
 			// If start times are equal, sort by end time
 			return new Date(a.end).getTime() - new Date(b.end).getTime();
 		});
-	const timeSlots = Array.from({ length: 13 }, (_, i) => i + 10); // 10AM to 10PM
+
+	// Calculate dynamic time range based on today's events
+	const calculateTimeRange = () => {
+		// Get regular events for today (excluding all-day events)
+		const regularEvents = regularEventsForDay;
+
+		if (regularEvents.length === 0) {
+			return { startHour: 10, endHour: 22 }; // Default range
+		}
+
+		let earliestHour = 24;
+		let latestHour = 0;
+
+		regularEvents.forEach(event => {
+			const eventStart = new Date(event.start);
+			const eventEnd = new Date(event.end);
+			
+			// Get hours in local time
+			const startHour = eventStart.getHours();
+			const startMinutes = eventStart.getMinutes();
+			const endHour = eventEnd.getHours();
+			const endMinutes = eventEnd.getMinutes();
+			
+			// Round down for start (e.g., 6:30 becomes 6:00)
+			earliestHour = Math.min(earliestHour, startHour);
+			
+			// Round up for end (e.g., 17:30 becomes 18:00)
+			latestHour = Math.max(latestHour, endMinutes > 0 ? endHour + 1 : endHour);
+		});
+
+		// Ensure minimum range (at least show 10-22 as default)
+		return {
+			startHour: Math.min(earliestHour, 10),
+			endHour: Math.max(latestHour, 22)
+		};
+	};
+
+	const timeRange = calculateTimeRange();
+	const timeSlots = Array.from(
+		{ length: timeRange.endHour - timeRange.startHour + 1 },
+		(_, i) => i + timeRange.startHour
+	);
 
 	const getEventColor = (index: number) => {
 		const colors = [

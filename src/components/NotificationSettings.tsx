@@ -56,7 +56,7 @@ export default function NotificationSettings({
 	const permissionStatus = getPermissionStatus();
 
 	return (
-		<div className="bg-white rounded-lg p-4 border border-gray-200">
+		<div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
 			<div className="flex items-center space-x-3">
 				<div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
 					<svg
@@ -81,7 +81,9 @@ export default function NotificationSettings({
 					</svg>
 				</div>
 				<div className="flex-1">
-					<h4 className="font-medium text-gray-900">予定開始前通知</h4>
+					<h4 className="font-medium text-gray-900 dark:text-white">
+						予定開始前通知
+					</h4>
 					<div className="flex items-center space-x-2 mt-1">
 						<span
 							className={`text-xs px-3 py-1 rounded-full font-medium ${permissionStatus.bg} ${permissionStatus.color}`}
@@ -105,9 +107,9 @@ export default function NotificationSettings({
 			</div>
 
 			{isOpen && (
-				<div className="mt-4 pt-4 border-t border-gray-200 space-y-4">
+				<div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
 					<div className="flex items-center justify-between">
-						<span className="text-sm font-medium text-gray-700">
+						<span className="text-sm font-medium text-gray-700 dark:text-gray-300">
 							通知を有効にする
 						</span>
 						<button
@@ -115,7 +117,9 @@ export default function NotificationSettings({
 							aria-label="通知を有効にする"
 							onClick={handleToggle}
 							className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-								settings.enabled ? "bg-blue-600" : "bg-gray-200"
+								settings.enabled
+									? "bg-blue-600"
+									: "bg-gray-200 dark:bg-gray-600"
 							}`}
 						>
 							<span
@@ -127,11 +131,11 @@ export default function NotificationSettings({
 					</div>
 
 					{settings.enabled && (
-						<div className="bg-blue-50 rounded-lg p-3 border border-blue-200 space-y-3">
+						<div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3 border border-blue-200 dark:border-blue-700 space-y-3">
 							<div>
 								<label
 									htmlFor="notification-timing"
-									className="block text-sm font-medium text-gray-700 mb-2"
+									className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
 								>
 									通知タイミング
 								</label>
@@ -139,7 +143,7 @@ export default function NotificationSettings({
 									id="notification-timing"
 									value={settings.minutes}
 									onChange={(e) => handleMinutesChange(Number(e.target.value))}
-									className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white"
+									className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
 								>
 									<option value={5}>5分前</option>
 									<option value={10}>10分前</option>
@@ -150,7 +154,7 @@ export default function NotificationSettings({
 							</div>
 
 							<div className="flex items-center justify-between">
-								<span className="text-sm font-medium text-gray-700">
+								<span className="text-sm font-medium text-gray-700 dark:text-gray-300">
 									予定開始時刻にも通知する
 								</span>
 								<button
@@ -163,7 +167,9 @@ export default function NotificationSettings({
 										})
 									}
 									className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-										settings.enableStartTime ? "bg-blue-600" : "bg-gray-200"
+										settings.enableStartTime
+											? "bg-blue-600"
+											: "bg-gray-200 dark:bg-gray-600"
 									}`}
 								>
 									<span
@@ -179,8 +185,8 @@ export default function NotificationSettings({
 					)}
 
 					{permission === "denied" && (
-						<div className="p-3 bg-red-50 border border-red-200 rounded-md">
-							<p className="text-sm text-red-600">
+						<div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-md">
+							<p className="text-sm text-red-600 dark:text-red-400">
 								通知が拒否されています。ブラウザの設定から通知を許可してください。
 							</p>
 						</div>

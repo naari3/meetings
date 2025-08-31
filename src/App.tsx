@@ -73,11 +73,11 @@ function App() {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+			<div className="flex items-center justify-center min-h-screen">
 				<div className="text-center">
-					<div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-6"></div>
-					<div className="bg-white/80 backdrop-blur-sm rounded-lg px-6 py-3">
-						<p className="text-gray-700 font-medium">
+					<div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 dark:border-blue-400 border-t-transparent mx-auto mb-6"></div>
+					<div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg px-6 py-3">
+						<p className="text-gray-700 dark:text-gray-200 font-medium">
 							カレンダーイベントを読み込み中...
 						</p>
 					</div>
@@ -87,11 +87,11 @@ function App() {
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+		<div className="min-h-screen">
 			<div className="container mx-auto px-4 py-8 max-w-7xl">
 				{/* Content */}
 				{events.length === 0 ? (
-					<div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-12 text-center">
+					<div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-12 text-center">
 						<div className="w-24 h-24 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
 							<svg
 								aria-hidden="true"
@@ -108,10 +108,10 @@ function App() {
 								/>
 							</svg>
 						</div>
-						<h3 className="text-2xl font-bold text-gray-900 mb-3">
+						<h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
 							予定がありません
 						</h3>
-						<p className="text-gray-600 text-lg">
+						<p className="text-gray-600 dark:text-gray-300 text-lg">
 							スケジュールが空いています！新しい予定を追加してみましょう。
 						</p>
 					</div>
@@ -135,10 +135,10 @@ function App() {
 						)}
 
 						{/* Additional Features */}
-						<div className="bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200 p-6">
+						<div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-gray-700 p-6">
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-1">
 								{/* ICS Export */}
-								<div className="bg-white rounded-lg p-4 border border-gray-200">
+								<div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
 									<div className="flex items-center space-x-3">
 										<div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
 											<svg
@@ -157,10 +157,10 @@ function App() {
 											</svg>
 										</div>
 										<div className="flex-1">
-											<h4 className="font-medium text-gray-900">
+											<h4 className="font-medium text-gray-900 dark:text-white">
 												カレンダーエクスポート
 											</h4>
-											<p className="text-sm text-gray-600">
+											<p className="text-sm text-gray-600 dark:text-gray-300">
 												ICS形式でダウンロード
 											</p>
 										</div>
@@ -190,8 +190,8 @@ function App() {
 
 				{/* Footer */}
 				<footer className="text-center mt-12">
-					<div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 inline-block border border-gray-200">
-						<p className="text-sm text-gray-600">
+					<div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 inline-block border border-gray-200 dark:border-gray-700">
+						<p className="text-sm text-gray-600 dark:text-gray-300">
 							最終更新:{" "}
 							{generatedAt
 								? new Date(generatedAt).toLocaleString("ja-JP")

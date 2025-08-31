@@ -109,7 +109,7 @@ export const useNotifications = (events: CalendarEvent[]) => {
 		if (settings.enabled && permission === "granted") {
 			scheduleNotifications();
 		}
-		
+
 		// クリーンアップ: コンポーネントのアンマウント時にタイマーをクリア
 		return () => {
 			scheduledTimers.current.forEach((timer) => clearTimeout(timer));

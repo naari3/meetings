@@ -80,7 +80,7 @@ export default function CalendarGrid({ events }: CalendarGridProps) {
 	];
 
 	return (
-		<section className="relative bg-stone-50 py-24">
+		<section className="relative bg-stone-50 dark:bg-gray-900 py-24">
 			<div className="w-full max-w-7xl mx-auto px-6 lg:px-8 overflow-x-auto">
 				<div className="flex flex-col md:flex-row max-md:gap-3 items-center justify-between mb-5">
 					<div className="flex items-center gap-4">
@@ -97,57 +97,85 @@ export default function CalendarGrid({ events }: CalendarGridProps) {
 								fill="#111827"
 							/>
 						</svg>
-						<h6 className="text-xl leading-8 font-semibold text-gray-900">
+						<h6 className="text-xl leading-8 font-semibold text-gray-900 dark:text-white">
 							{monthNames[currentMonth]} {currentYear}
 						</h6>
 					</div>
 				</div>
-				<div className="border border-gray-200">
-					<div className="grid grid-cols-7 divide-gray-200 border-b border-gray-200">
-						<div className="p-3.5 flex flex-col sm:flex-row items-center justify-between border-r border-gray-200">
-							<span className="text-sm font-medium text-gray-500">Sun</span>
-							<span className="text-sm font-medium text-gray-900">09</span>
+				<div className="border border-gray-200 dark:border-gray-700">
+					<div className="grid grid-cols-7 divide-gray-200 dark:divide-gray-700 border-b border-gray-200 dark:border-gray-700">
+						<div className="p-3.5 flex flex-col sm:flex-row items-center justify-between border-r border-gray-200 dark:border-gray-700">
+							<span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+								Sun
+							</span>
+							<span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+								09
+							</span>
 						</div>
-						<div className="p-3.5 flex flex-col sm:flex-row items-center justify-between border-r border-gray-200">
-							<span className="text-sm font-medium text-gray-500">Mon</span>
-							<span className="text-sm font-medium text-gray-900">10</span>
+						<div className="p-3.5 flex flex-col sm:flex-row items-center justify-between border-r border-gray-200 dark:border-gray-700">
+							<span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+								Mon
+							</span>
+							<span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+								10
+							</span>
 						</div>
-						<div className="p-3.5 flex flex-col sm:flex-row items-center justify-between border-r border-gray-200">
-							<span className="text-sm font-medium text-gray-500">Tue</span>
-							<span className="text-sm font-medium text-gray-900">11</span>
+						<div className="p-3.5 flex flex-col sm:flex-row items-center justify-between border-r border-gray-200 dark:border-gray-700">
+							<span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+								Tue
+							</span>
+							<span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+								11
+							</span>
 						</div>
-						<div className="p-3.5 flex flex-col sm:flex-row items-center justify-between border-r border-gray-200">
-							<span className="text-sm font-medium text-gray-500">Wed</span>
-							<span className="text-sm font-medium text-gray-900">12</span>
+						<div className="p-3.5 flex flex-col sm:flex-row items-center justify-between border-r border-gray-200 dark:border-gray-700">
+							<span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+								Wed
+							</span>
+							<span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+								12
+							</span>
 						</div>
-						<div className="p-3.5 flex flex-col sm:flex-row items-center justify-between border-r border-gray-200">
-							<span className="text-sm font-medium text-gray-500">Thu</span>
-							<span className="text-sm font-medium text-gray-900">13</span>
+						<div className="p-3.5 flex flex-col sm:flex-row items-center justify-between border-r border-gray-200 dark:border-gray-700">
+							<span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+								Thu
+							</span>
+							<span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+								13
+							</span>
 						</div>
-						<div className="p-3.5 flex flex-col sm:flex-row items-center justify-between border-r border-gray-200">
-							<span className="text-sm font-medium text-gray-500">Fri</span>
-							<span className="text-sm font-medium text-gray-900">14</span>
+						<div className="p-3.5 flex flex-col sm:flex-row items-center justify-between border-r border-gray-200 dark:border-gray-700">
+							<span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+								Fri
+							</span>
+							<span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+								14
+							</span>
 						</div>
 						<div className="p-3.5 flex flex-col sm:flex-row items-center justify-between">
-							<span className="text-sm font-medium text-gray-500">Sat</span>
-							<span className="text-sm font-medium text-gray-900">15</span>
+							<span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+								Sat
+							</span>
+							<span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+								15
+							</span>
 						</div>
 					</div>
-					<div className="grid grid-cols-7 divide-gray-200">
+					<div className="grid grid-cols-7 divide-gray-200 dark:divide-gray-700">
 						{calendarDays.map((day, index) => (
 							<CalendarCell key={index} day={day} events={events} />
 						))}
 					</div>
 				</div>
 				<div className="w-full lg:hidden py-8 px-2.5">
-					<div className="bg-gray-50 w-full rounded-xl">
+					<div className="bg-gray-50 dark:bg-gray-800 w-full rounded-xl">
 						{events.slice(0, 3).map((event, index) => (
 							<div
 								key={index}
 								className="p-3 w-full flex items-center justify-between group transition-all duration-300"
 							>
 								<div className="flex flex-col gap-2">
-									<span className="text-sm font-medium text-gray-900">
+									<span className="text-sm font-medium text-gray-900 dark:text-gray-100">
 										{event.summary}
 									</span>
 									<div className="flex items-center gap-2.5">
@@ -167,7 +195,7 @@ export default function CalendarGrid({ events }: CalendarGridProps) {
 												strokeLinejoin="round"
 											/>
 										</svg>
-										<span className="text-xs font-medium text-gray-600">
+										<span className="text-xs font-medium text-gray-600 dark:text-gray-400">
 											{new Date(event.start).toLocaleTimeString("ja-JP", {
 												hour: "numeric",
 												minute: "2-digit",
@@ -175,7 +203,7 @@ export default function CalendarGrid({ events }: CalendarGridProps) {
 										</span>
 									</div>
 								</div>
-								<button className="py-1 px-2 rounded border border-gray-400 text-xs font-medium text-gray-900 opacity-0 transition-all duration-500 group-hover:opacity-100">
+								<button className="py-1 px-2 rounded border border-gray-400 dark:border-gray-600 text-xs font-medium text-gray-900 dark:text-gray-100 dark:bg-gray-700 opacity-0 transition-all duration-500 group-hover:opacity-100">
 									Edit
 								</button>
 							</div>
@@ -197,8 +225,8 @@ function CalendarCell({ day, events }: CalendarCellProps) {
 
 	return (
 		<div
-			className={`p-3.5 xl:aspect-auto lg:h-28 border-b border-r border-gray-200 flex justify-between flex-col max-lg:items-center min-h-[70px] transition-all duration-300 hover:bg-stone-100 ${
-				!day.isCurrentMonth ? "bg-gray-50" : ""
+			className={`p-3.5 xl:aspect-auto lg:h-28 border-b border-r border-gray-200 dark:border-gray-700 flex justify-between flex-col max-lg:items-center min-h-[70px] transition-all duration-300 hover:bg-stone-100 dark:hover:bg-gray-800 ${
+				!day.isCurrentMonth ? "bg-gray-50 dark:bg-gray-800" : ""
 			}`}
 		>
 			<span
@@ -206,18 +234,18 @@ function CalendarCell({ day, events }: CalendarCellProps) {
 					day.isToday
 						? "text-white bg-indigo-600"
 						: !day.isCurrentMonth
-							? "text-gray-500"
-							: "text-gray-900"
+							? "text-gray-500 dark:text-gray-400"
+							: "text-gray-900 dark:text-gray-100"
 				}`}
 			>
 				{day.date.getDate()}
 			</span>
 			{hasEvent && (
 				<>
-					<span className="hidden lg:block text-xs font-medium text-gray-500">
+					<span className="hidden lg:block text-xs font-medium text-gray-500 dark:text-gray-400">
 						{day.events[0].summary}
 					</span>
-					<span className="lg:hidden w-2 h-2 rounded-full bg-gray-400"></span>
+					<span className="lg:hidden w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-500"></span>
 				</>
 			)}
 		</div>
@@ -238,10 +266,10 @@ function _EventBadge({ event }: EventBadgeProps) {
 		endDate.getMinutes() === 0;
 
 	return (
-		<div className="bg-blue-100 text-blue-800 text-xs p-1 rounded truncate">
+		<div className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs p-1 rounded truncate">
 			<div className="font-medium truncate">{event.summary}</div>
 			{!isAllDay && (
-				<div className="text-blue-600 hidden sm:block">
+				<div className="text-blue-600 dark:text-blue-300 hidden sm:block">
 					{startDate.toLocaleTimeString("ja-JP", {
 						hour: "2-digit",
 						minute: "2-digit",

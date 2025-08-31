@@ -152,19 +152,21 @@ export default function StatsCard({ events }: StatsCardProps) {
 	};
 
 	return (
-		<div className="bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200 p-8 mb-8">
+		<div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-gray-700 p-8 mb-8">
 			<div className="text-center mb-8">
-				<h2 className="text-2xl font-bold text-gray-900 mb-2">
+				<h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
 					ダッシュボード
 				</h2>
-				<p className="text-gray-600">なありのスケジュールの概要</p>
+				<p className="text-gray-600 dark:text-gray-300">
+					なありのスケジュールの概要
+				</p>
 			</div>
 
 			<div className="flex flex-wrap justify-center gap-6 mb-8">
 				{stats.map((stat) => (
 					<div
 						key={stat.id}
-						className="relative overflow-hidden bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all duration-200 group w-full sm:w-auto sm:min-w-[200px] sm:flex-1 sm:max-w-[240px]"
+						className="relative overflow-hidden bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg dark:hover:shadow-gray-900/20 transition-all duration-200 group w-full sm:w-auto sm:min-w-[200px] sm:flex-1 sm:max-w-[240px]"
 					>
 						<div className="flex items-center justify-between mb-4">
 							<div
@@ -215,7 +217,9 @@ export default function StatsCard({ events }: StatsCardProps) {
 									{stat.suffix}
 								</span>
 							</div>
-							<p className="text-sm text-gray-600 font-medium">{stat.label}</p>
+							<p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
+								{stat.label}
+							</p>
 						</div>
 
 						{/* Background decoration */}
@@ -227,8 +231,8 @@ export default function StatsCard({ events }: StatsCardProps) {
 			</div>
 
 			{/* Today's Schedule */}
-			<div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6">
-				<h3 className="text-lg font-semibold text-gray-900 mb-4">
+			<div className="bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-800 dark:to-blue-900/30 rounded-xl p-6">
+				<h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
 					今日の予定一覧
 				</h3>
 				{todayEvents.length > 0 ? (
@@ -254,16 +258,16 @@ export default function StatsCard({ events }: StatsCardProps) {
 							return (
 								<div
 									key={index}
-									className="bg-white rounded-lg p-4 border border-gray-200"
+									className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700"
 								>
 									<div className="flex items-center justify-between">
 										<div className="flex items-center space-x-3">
-											<div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-											<span className="font-medium text-gray-900">
+											<div className="w-3 h-3 bg-blue-500 dark:bg-blue-400 rounded-full"></div>
+											<span className="font-medium text-gray-900 dark:text-white">
 												{event.title}
 											</span>
 										</div>
-										<div className="text-sm text-gray-600">
+										<div className="text-sm text-gray-600 dark:text-gray-400">
 											{startTime} - {endTime} ({duration}分)
 										</div>
 									</div>
@@ -273,10 +277,10 @@ export default function StatsCard({ events }: StatsCardProps) {
 					</div>
 				) : (
 					<div className="text-center py-8">
-						<div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+						<div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
 							<svg
 								aria-hidden="true"
-								className="w-8 h-8 text-gray-400"
+								className="w-8 h-8 text-gray-400 dark:text-gray-500"
 								fill="none"
 								stroke="currentColor"
 								viewBox="0 0 24 24"
@@ -289,7 +293,9 @@ export default function StatsCard({ events }: StatsCardProps) {
 								/>
 							</svg>
 						</div>
-						<p className="text-gray-500">今日は予定がありません</p>
+						<p className="text-gray-500 dark:text-gray-400">
+							今日は予定がありません
+						</p>
 					</div>
 				)}
 			</div>

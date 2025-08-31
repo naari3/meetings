@@ -7,7 +7,7 @@ interface ViewToggleProps {
 
 export default function ViewToggle({ view, setView }: ViewToggleProps) {
 	return (
-		<div className="bg-white rounded-xl p-1 shadow-sm border border-gray-200 inline-flex">
+		<div className="bg-white dark:bg-gray-800 rounded-xl p-1 shadow-sm border border-gray-200 dark:border-gray-700 inline-flex">
 			<Button
 				variant="viewToggle"
 				active={view === "weekly"}

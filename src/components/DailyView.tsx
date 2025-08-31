@@ -88,7 +88,7 @@ export default function DailyView({
 	// Calculate dynamic time range based on today's events
 	const calculateTimeRange = () => {
 		// Get regular events for today (excluding all-day events)
-		const regularEvents = regularEventsForDay;
+		const regularEvents = timedEvents;
 
 		if (regularEvents.length === 0) {
 			return { startHour: 10, endHour: 22 }; // Default range

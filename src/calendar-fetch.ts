@@ -13,7 +13,7 @@ async function getAuthClient() {
 		scopes: string[];
 		keyFile?: string;
 	} = {
-		scopes: CALENDAR_CONFIG.SCOPES,
+		scopes: [...CALENDAR_CONFIG.SCOPES],
 	};
 
 	// サービスアカウントキーファイルがある場合は使用

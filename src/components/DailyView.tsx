@@ -103,7 +103,6 @@ export default function DailyView({
 			
 			// Get hours in local time
 			const startHour = eventStart.getHours();
-			const startMinutes = eventStart.getMinutes();
 			const endHour = eventEnd.getHours();
 			const endMinutes = eventEnd.getMinutes();
 			
@@ -265,7 +264,7 @@ export default function DailyView({
 								const color = getEventColor(index);
 								return (
 									<div
-										key={index}
+										key={`${event.start}-${event.summary}-${index}`}
 										className={`rounded px-3 py-2 text-sm font-medium ${color.bg} ${color.text} border ${color.border}`}
 									>
 										{event.summary}

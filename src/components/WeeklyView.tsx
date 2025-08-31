@@ -114,7 +114,6 @@ export default function WeeklyView({
 			
 			// Get hours in local time
 			const startHour = eventStart.getHours();
-			const startMinutes = eventStart.getMinutes();
 			const endHour = eventEnd.getHours();
 			const endMinutes = eventEnd.getMinutes();
 			

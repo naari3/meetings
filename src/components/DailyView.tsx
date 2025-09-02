@@ -429,7 +429,7 @@ export default function DailyView({
 											className={`absolute rounded pl-1.5 py-1.5 pr-0 border-l-2 ${color.bg} ${color.border} z-20`}
 											style={{
 												top: `${topPercent}%`,
-												height: `${Math.max(heightPercent, 5)}%`,
+												height: `${Math.max(heightPercent, 3)}%`,
 												left: `${leftMargin}px`,
 												right: `${rightMargin}px`,
 											}}

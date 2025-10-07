@@ -9,24 +9,45 @@ interface NotificationSettingsProps {
 	onRequestPermission: () => Promise<boolean>;
 }
 
-// テスト用の通知音再生関数
+// テスト用の通知音再生関数（ピーピーピー、ピーピーピーのパターン）
 const playTestSound = (volume: number) => {
 	const audioContext = new AudioContext();
-	const oscillator = audioContext.createOscillator();
-	const gainNode = audioContext.createGain();
 
-	oscillator.connect(gainNode);
-	gainNode.connect(audioContext.destination);
+	// ビープ音のパターン: [開始時刻, 長さ]
+	const beepPattern = [
+		// 1回目のピーピーピー
+		[0, 0.15],
+		[0.2, 0.15],
+		[0.4, 0.15],
+		// 少し間を空けて2回目のピーピーピー
+		[0.8, 0.15],
+		[1.0, 0.15],
+		[1.2, 0.15],
+	];
 
-	oscillator.frequency.value = 800;
-	oscillator.type = "sine";
+	beepPattern.forEach(([startTime, duration]) => {
+		const oscillator = audioContext.createOscillator();
+		const gainNode = audioContext.createGain();
 
-	gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-	gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
-	gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.2);
+		oscillator.connect(gainNode);
+		gainNode.connect(audioContext.destination);
 
-	oscillator.start(audioContext.currentTime);
-	oscillator.stop(audioContext.currentTime + 0.2);
+		// ビープ音の設定
+		oscillator.frequency.value = 800;
+		oscillator.type = "sine";
+
+		// 音量のフェードイン・フェードアウト
+		const fadeIn = 0.01;
+		const fadeOut = 0.05;
+		gainNode.gain.setValueAtTime(0, audioContext.currentTime + startTime);
+		gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + startTime + fadeIn);
+		gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + startTime + duration - fadeOut);
+		gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + startTime + duration);
+
+		// 再生
+		oscillator.start(audioContext.currentTime + startTime);
+		oscillator.stop(audioContext.currentTime + startTime + duration);
+	});
 };
 
 export default function NotificationSettings({

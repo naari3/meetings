@@ -9,6 +9,26 @@ interface NotificationSettingsProps {
 	onRequestPermission: () => Promise<boolean>;
 }
 
+// テスト用の通知音再生関数
+const playTestSound = (volume: number) => {
+	const audioContext = new AudioContext();
+	const oscillator = audioContext.createOscillator();
+	const gainNode = audioContext.createGain();
+
+	oscillator.connect(gainNode);
+	gainNode.connect(audioContext.destination);
+
+	oscillator.frequency.value = 800;
+	oscillator.type = "sine";
+
+	gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+	gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
+	gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.2);
+
+	oscillator.start(audioContext.currentTime);
+	oscillator.stop(audioContext.currentTime + 0.2);
+};
+
 export default function NotificationSettings({
 	settings,
 	permission,
@@ -181,6 +201,68 @@ export default function NotificationSettings({
 									/>
 								</button>
 							</div>
+
+							<div className="flex items-center justify-between">
+								<span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+									通知音を鳴らす
+								</span>
+								<button
+									type="button"
+									aria-label="通知音を鳴らす"
+									onClick={() =>
+										onSettingsChange({
+											...settings,
+											soundEnabled: !settings.soundEnabled,
+										})
+									}
+									className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+										settings.soundEnabled
+											? "bg-blue-600"
+											: "bg-gray-200 dark:bg-gray-600"
+									}`}
+								>
+									<span
+										className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+											settings.soundEnabled
+												? "translate-x-6"
+												: "translate-x-1"
+										}`}
+									/>
+								</button>
+							</div>
+
+							{settings.soundEnabled && (
+								<div>
+									<div className="flex items-center justify-between mb-2">
+										<label
+											htmlFor="sound-volume"
+											className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+										>
+											音量: {Math.round(settings.soundVolume * 100)}%
+										</label>
+										<Button
+											variant="secondary"
+											onClick={() => playTestSound(settings.soundVolume)}
+										>
+											テスト
+										</Button>
+									</div>
+									<input
+										id="sound-volume"
+										type="range"
+										min="0"
+										max="100"
+										value={Math.round(settings.soundVolume * 100)}
+										onChange={(e) =>
+											onSettingsChange({
+												...settings,
+												soundVolume: Number(e.target.value) / 100,
+											})
+										}
+										className="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-600"
+									/>
+								</div>
+							)}
 						</div>
 					)}
 

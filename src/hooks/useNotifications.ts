@@ -5,13 +5,40 @@ export interface NotificationSettings {
 	enabled: boolean;
 	minutes: number;
 	enableStartTime: boolean;
+	soundEnabled: boolean;
+	soundVolume: number; // 0.0 ~ 1.0
 }
+
+// 通知音を再生する関数
+const playNotificationSound = (volume = 0.3) => {
+	const audioContext = new AudioContext();
+	const oscillator = audioContext.createOscillator();
+	const gainNode = audioContext.createGain();
+
+	oscillator.connect(gainNode);
+	gainNode.connect(audioContext.destination);
+
+	// ビープ音の設定
+	oscillator.frequency.value = 800; // 周波数 (Hz)
+	oscillator.type = "sine";
+
+	// 音量のフェードイン・フェードアウト
+	gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+	gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
+	gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.2);
+
+	// 再生
+	oscillator.start(audioContext.currentTime);
+	oscillator.stop(audioContext.currentTime + 0.2);
+};
 
 export const useNotifications = (events: CalendarEvent[]) => {
 	const [settings, setSettings] = useState<NotificationSettings>({
 		enabled: false,
 		minutes: 10,
 		enableStartTime: false,
+		soundEnabled: true,
+		soundVolume: 0.3,
 	});
 	const [permission, setPermission] = useState<NotificationPermission>(
 		typeof Notification !== "undefined" ? Notification.permission : "default",
@@ -27,6 +54,8 @@ export const useNotifications = (events: CalendarEvent[]) => {
 				enabled: parsed.enabled || false,
 				minutes: parsed.minutes || 10,
 				enableStartTime: parsed.enableStartTime || false,
+				soundEnabled: parsed.soundEnabled !== undefined ? parsed.soundEnabled : true,
+				soundVolume: parsed.soundVolume !== undefined ? parsed.soundVolume : 0.3,
 			});
 		}
 	}, []);
@@ -92,6 +121,11 @@ export const useNotifications = (events: CalendarEvent[]) => {
 				const timeUntilStart = eventStart.getTime() - now.getTime();
 				if (timeUntilStart > 0 && timeUntilStart <= 24 * 60 * 60 * 1000) {
 					const timerId = setTimeout(() => {
+						// 通知音を再生
+						if (settings.soundEnabled) {
+							playNotificationSound(settings.soundVolume);
+						}
+
 						new Notification("予定開始のお知らせ", {
 							body: `「${event.summary}」が始まりました`,
 							icon: "/favicon.ico",

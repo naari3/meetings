@@ -53,3 +53,10 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
         id: deployment
+
+      - name: Keep repository alive
+        uses: gautamkrishnar/keepalive-workflow@v2
+        with:
+          time_period: 50
+          commit_message: 'chore: keepalive [skip ci]'
+        if: always()

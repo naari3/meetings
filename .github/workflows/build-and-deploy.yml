@@ -55,8 +55,16 @@ jobs:
         id: deployment
 
       - name: Keep repository alive
-        uses: gautamkrishnar/keepalive-workflow@v2
-        with:
-          time_period: 50
-          commit_message: 'chore: keepalive [skip ci]'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          LAST_COMMIT=$(git log -1 --format=%ct)
+          NOW=$(date +%s)
+          DAYS=$(( (NOW - LAST_COMMIT) / 86400 ))
+          if [ "$DAYS" -ge 50 ]; then
+            git commit --allow-empty -m "chore: keepalive [skip ci]"
+            git push
+          else
+            echo "Last commit was $DAYS days ago, no keepalive needed"
+          fi
         if: always()

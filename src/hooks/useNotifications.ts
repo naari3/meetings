@@ -7,7 +7,61 @@ export interface NotificationSettings {
 	enableStartTime: boolean;
 	soundEnabled: boolean;
 	soundVolume: number; // 0.0 ~ 1.0
+	firstEventAlarmEnabled: boolean;
+	firstEventAlarmMinutes: number;
 }
+
+// 最初の予定用のアラーム音（うるさめ）。
+// 880Hz/1100Hz の矩形波を交互に鳴らすサイレン風のパターン。
+const playLoudAlarmSound = (volume = 0.5) => {
+	const audioContext = new AudioContext();
+	// 音量はベース音量 + 0.2 を上限 0.9 にクランプして "うるささ" を底上げ
+	const loudVolume = Math.min(0.9, volume + 0.2);
+
+	// [開始秒, 長さ秒, 周波数Hz] のリスト。約4秒分のサイレン。
+	const pattern: Array<[number, number, number]> = [
+		[0.0, 0.35, 880],
+		[0.35, 0.35, 1100],
+		[0.7, 0.35, 880],
+		[1.05, 0.35, 1100],
+		[1.4, 0.35, 880],
+		[1.75, 0.35, 1100],
+		[2.1, 0.35, 880],
+		[2.45, 0.35, 1100],
+		[2.8, 0.35, 880],
+		[3.15, 0.35, 1100],
+	];
+
+	for (const [startTime, duration, freq] of pattern) {
+		const oscillator = audioContext.createOscillator();
+		const gainNode = audioContext.createGain();
+
+		oscillator.connect(gainNode);
+		gainNode.connect(audioContext.destination);
+
+		oscillator.frequency.value = freq;
+		oscillator.type = "square";
+
+		const fadeIn = 0.005;
+		const fadeOut = 0.02;
+		gainNode.gain.setValueAtTime(0, audioContext.currentTime + startTime);
+		gainNode.gain.linearRampToValueAtTime(
+			loudVolume,
+			audioContext.currentTime + startTime + fadeIn,
+		);
+		gainNode.gain.linearRampToValueAtTime(
+			loudVolume,
+			audioContext.currentTime + startTime + duration - fadeOut,
+		);
+		gainNode.gain.linearRampToValueAtTime(
+			0,
+			audioContext.currentTime + startTime + duration,
+		);
+
+		oscillator.start(audioContext.currentTime + startTime);
+		oscillator.stop(audioContext.currentTime + startTime + duration);
+	}
+};
 
 // 通知音を再生する関数（ピーピーピー、ピーピーピーのパターン）
 const playNotificationSound = (volume = 0.3) => {
@@ -57,6 +111,8 @@ export const useNotifications = (events: CalendarEvent[]) => {
 		enableStartTime: false,
 		soundEnabled: true,
 		soundVolume: 0.3,
+		firstEventAlarmEnabled: false,
+		firstEventAlarmMinutes: 30,
 	});
 	const [permission, setPermission] = useState<NotificationPermission>(
 		typeof Notification !== "undefined" ? Notification.permission : "default",
@@ -74,6 +130,8 @@ export const useNotifications = (events: CalendarEvent[]) => {
 				enableStartTime: parsed.enableStartTime || false,
 				soundEnabled: parsed.soundEnabled !== undefined ? parsed.soundEnabled : true,
 				soundVolume: parsed.soundVolume !== undefined ? parsed.soundVolume : 0.3,
+				firstEventAlarmEnabled: parsed.firstEventAlarmEnabled || false,
+				firstEventAlarmMinutes: parsed.firstEventAlarmMinutes || 30,
 			});
 		}
 	}, []);
@@ -104,11 +162,33 @@ export const useNotifications = (events: CalendarEvent[]) => {
 		const now = new Date();
 		const upcomingEvents = events.filter((event) => {
 			const eventStart = new Date(event.start);
-			const notificationTime = new Date(
+			if (eventStart <= now) return false;
+			const preNotificationTime = new Date(
 				eventStart.getTime() - settings.minutes * 60 * 1000,
 			);
-			return notificationTime > now && eventStart > now;
+			const firstEventAlarmTime = new Date(
+				eventStart.getTime() - settings.firstEventAlarmMinutes * 60 * 1000,
+			);
+			// いずれかの通知タイミングが未来なら対象に含める
+			return (
+				preNotificationTime > now ||
+				firstEventAlarmTime > now ||
+				settings.enableStartTime
+			);
 		});
+
+		// 各日の最初のイベントを抽出（ローカル日付でグルーピング）
+		const firstEventOfDay = new Map<string, CalendarEvent>();
+		if (settings.firstEventAlarmEnabled) {
+			for (const event of events) {
+				const eventStart = new Date(event.start);
+				const dateKey = `${eventStart.getFullYear()}-${eventStart.getMonth()}-${eventStart.getDate()}`;
+				const existing = firstEventOfDay.get(dateKey);
+				if (!existing || eventStart < new Date(existing.start)) {
+					firstEventOfDay.set(dateKey, event);
+				}
+			}
+		}
 
 		upcomingEvents.forEach((event) => {
 			const eventStart = new Date(event.start);
@@ -132,6 +212,33 @@ export const useNotifications = (events: CalendarEvent[]) => {
 					});
 				}, timeUntilNotification);
 				scheduledTimers.current.push(timerId);
+			}
+
+			// 各日の最初のイベントのアラーム
+			if (settings.firstEventAlarmEnabled) {
+				const eventStartDate = new Date(event.start);
+				const dateKey = `${eventStartDate.getFullYear()}-${eventStartDate.getMonth()}-${eventStartDate.getDate()}`;
+				const firstEvent = firstEventOfDay.get(dateKey);
+				if (firstEvent && firstEvent.start === event.start) {
+					const alarmTime = new Date(
+						eventStart.getTime() - settings.firstEventAlarmMinutes * 60 * 1000,
+					);
+					const timeUntilAlarm = alarmTime.getTime() - now.getTime();
+					if (timeUntilAlarm > 0 && timeUntilAlarm <= 24 * 60 * 60 * 1000) {
+						const timerId = setTimeout(() => {
+							if (settings.soundEnabled) {
+								playLoudAlarmSound(settings.soundVolume);
+							}
+							new Notification("本日最初の予定のアラーム", {
+								body: `${settings.firstEventAlarmMinutes}分後に本日最初の予定「${event.summary}」が始まります`,
+								icon: "/favicon.ico",
+								tag: `first-event-alarm-${event.start}`,
+								requireInteraction: false,
+							});
+						}, timeUntilAlarm);
+						scheduledTimers.current.push(timerId);
+					}
+				}
 			}
 
 			// 開始時刻通知

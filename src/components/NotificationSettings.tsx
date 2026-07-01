@@ -225,6 +225,62 @@ export default function NotificationSettings({
 
 							<div className="flex items-center justify-between">
 								<span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+									各日最初の予定アラーム（{settings.firstEventAlarmMinutes}分前）
+								</span>
+								<button
+									type="button"
+									aria-label="各日最初の予定アラーム"
+									onClick={() =>
+										onSettingsChange({
+											...settings,
+											firstEventAlarmEnabled: !settings.firstEventAlarmEnabled,
+										})
+									}
+									className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+										settings.firstEventAlarmEnabled
+											? "bg-blue-600"
+											: "bg-gray-200 dark:bg-gray-600"
+									}`}
+								>
+									<span
+										className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+											settings.firstEventAlarmEnabled
+												? "translate-x-6"
+												: "translate-x-1"
+										}`}
+									/>
+								</button>
+							</div>
+
+							{settings.firstEventAlarmEnabled && (
+								<div>
+									<label
+										htmlFor="first-event-alarm-timing"
+										className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+									>
+										アラームタイミング
+									</label>
+									<select
+										id="first-event-alarm-timing"
+										value={settings.firstEventAlarmMinutes}
+										onChange={(e) =>
+											onSettingsChange({
+												...settings,
+												firstEventAlarmMinutes: Number(e.target.value),
+											})
+										}
+										className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+									>
+										<option value={15}>15分前</option>
+										<option value={30}>30分前</option>
+										<option value={45}>45分前</option>
+										<option value={60}>1時間前</option>
+									</select>
+								</div>
+							)}
+
+							<div className="flex items-center justify-between">
+								<span className="text-sm font-medium text-gray-700 dark:text-gray-300">
 									通知音を鳴らす
 								</span>
 								<button

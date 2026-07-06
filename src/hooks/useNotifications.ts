@@ -16,24 +16,34 @@ export interface AlarmController {
 }
 
 // 最初の予定用のアラーム音（うるさめ・停止操作があるまでループ）。
-// 880Hz/1100Hz の矩形波を交互に鳴らすサイレン風のパターン。
+// 1000Hz のサイン波で「ピピピ、ピピピ、ピピピ」を繰り返す。
 const playLoudAlarmSound = (volume = 0.5): AlarmController => {
 	const audioContext = new AudioContext();
 	// 音量はベース音量 + 0.2 を上限 0.9 にクランプして "うるささ" を底上げ
 	const loudVolume = Math.min(0.9, volume + 0.2);
 
-	// [開始秒(サイクル内), 長さ秒, 周波数Hz] のリスト。1サイクル約2.8秒。
-	const cyclePattern: Array<[number, number, number]> = [
-		[0.0, 0.35, 880],
-		[0.35, 0.35, 1100],
-		[0.7, 0.35, 880],
-		[1.05, 0.35, 1100],
-		[1.4, 0.35, 880],
-		[1.75, 0.35, 1100],
-		[2.1, 0.35, 880],
-		[2.45, 0.35, 1100],
-	];
-	const cycleDuration = 2.8;
+	// 3グループ × 3ピピの 1 サイクル。
+	// 1 ピピ = 0.1s、グループ内のピピ間 = 0.08s (=start 0.18s 刻み)、
+	// グループ間 = 0.5s、末尾に 0.5s の休止 → 1 サイクル = 3.08s
+	const beepDuration = 0.1;
+	const beepInterval = 0.18;
+	const groupInterval = 0.86;
+	const tailSilence = 0.5;
+	const beepsPerGroup = 3;
+	const groupsPerCycle = 3;
+
+	const cyclePattern: Array<[number, number, number]> = [];
+	for (let g = 0; g < groupsPerCycle; g++) {
+		for (let b = 0; b < beepsPerGroup; b++) {
+			const start = g * groupInterval + b * beepInterval;
+			cyclePattern.push([start, beepDuration, 1000]);
+		}
+	}
+	const lastBeepEnd =
+		(groupsPerCycle - 1) * groupInterval +
+		(beepsPerGroup - 1) * beepInterval +
+		beepDuration;
+	const cycleDuration = lastBeepEnd + tailSilence;
 
 	let stopped = false;
 	const activeOscillators: OscillatorNode[] = [];
@@ -47,7 +57,7 @@ const playLoudAlarmSound = (volume = 0.5): AlarmController => {
 			gainNode.connect(audioContext.destination);
 
 			oscillator.frequency.value = freq;
-			oscillator.type = "square";
+			oscillator.type = "sine";
 
 			const startAt = baseTime + startOffset;
 			const fadeIn = 0.005;

@@ -7,6 +7,7 @@ interface NotificationSettingsProps {
 	permission: NotificationPermission;
 	onSettingsChange: (settings: NotificationSettingsType) => void;
 	onRequestPermission: () => Promise<boolean>;
+	onTestAlarm: () => void;
 }
 
 // テスト用の通知音再生関数（ピーピーピー、ピーピーピーのパターン）
@@ -55,6 +56,7 @@ export default function NotificationSettings({
 	permission,
 	onSettingsChange,
 	onRequestPermission,
+	onTestAlarm,
 }: NotificationSettingsProps) {
 	const [isOpen, setIsOpen] = useState(false);
 
@@ -253,29 +255,39 @@ export default function NotificationSettings({
 							</div>
 
 							{settings.firstEventAlarmEnabled && (
-								<div>
-									<label
-										htmlFor="first-event-alarm-timing"
-										className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-									>
-										アラームタイミング
-									</label>
-									<select
-										id="first-event-alarm-timing"
-										value={settings.firstEventAlarmMinutes}
-										onChange={(e) =>
-											onSettingsChange({
-												...settings,
-												firstEventAlarmMinutes: Number(e.target.value),
-											})
-										}
-										className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
-									>
-										<option value={15}>15分前</option>
-										<option value={30}>30分前</option>
-										<option value={45}>45分前</option>
-										<option value={60}>1時間前</option>
-									</select>
+								<div className="space-y-3">
+									<div>
+										<label
+											htmlFor="first-event-alarm-timing"
+											className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+										>
+											アラームタイミング
+										</label>
+										<select
+											id="first-event-alarm-timing"
+											value={settings.firstEventAlarmMinutes}
+											onChange={(e) =>
+												onSettingsChange({
+													...settings,
+													firstEventAlarmMinutes: Number(e.target.value),
+												})
+											}
+											className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
+										>
+											<option value={15}>15分前</option>
+											<option value={30}>30分前</option>
+											<option value={45}>45分前</option>
+											<option value={60}>1時間前</option>
+										</select>
+									</div>
+									<div className="flex items-center justify-between">
+										<span className="text-sm text-gray-600 dark:text-gray-400">
+											アラームを実際に鳴らして試す
+										</span>
+										<Button variant="secondary" onClick={onTestAlarm}>
+											アラームをテスト
+										</Button>
+									</div>
 								</div>
 							)}
 

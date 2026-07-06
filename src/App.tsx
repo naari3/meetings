@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import AlarmModal from "./components/AlarmModal";
 import Button from "./components/Button";
 import DailyView from "./components/DailyView";
 import NotificationSettings from "./components/NotificationSettings";
@@ -19,6 +20,9 @@ function App() {
 		permission: notificationPermission,
 		saveSettings: saveNotificationSettings,
 		requestPermission: requestNotificationPermission,
+		activeAlarm,
+		dismissAlarm,
+		triggerTestAlarm,
 	} = useNotifications(events);
 
 	// Get the start of current week
@@ -88,6 +92,9 @@ function App() {
 
 	return (
 		<div className="min-h-screen">
+			{activeAlarm && (
+				<AlarmModal alarm={activeAlarm} onDismiss={dismissAlarm} />
+			)}
 			<div className="container mx-auto px-4 py-8 max-w-7xl">
 				{/* Content */}
 				{events.length === 0 ? (
@@ -182,6 +189,7 @@ function App() {
 									permission={notificationPermission}
 									onSettingsChange={saveNotificationSettings}
 									onRequestPermission={requestNotificationPermission}
+									onTestAlarm={triggerTestAlarm}
 								/>
 							</div>
 						</div>

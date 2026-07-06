@@ -11,15 +11,19 @@ export interface NotificationSettings {
 	firstEventAlarmMinutes: number;
 }
 
-// 最初の予定用のアラーム音（うるさめ）。
+export interface AlarmController {
+	stop: () => void;
+}
+
+// 最初の予定用のアラーム音（うるさめ・停止操作があるまでループ）。
 // 880Hz/1100Hz の矩形波を交互に鳴らすサイレン風のパターン。
-const playLoudAlarmSound = (volume = 0.5) => {
+const playLoudAlarmSound = (volume = 0.5): AlarmController => {
 	const audioContext = new AudioContext();
 	// 音量はベース音量 + 0.2 を上限 0.9 にクランプして "うるささ" を底上げ
 	const loudVolume = Math.min(0.9, volume + 0.2);
 
-	// [開始秒, 長さ秒, 周波数Hz] のリスト。約4秒分のサイレン。
-	const pattern: Array<[number, number, number]> = [
+	// [開始秒(サイクル内), 長さ秒, 周波数Hz] のリスト。1サイクル約2.8秒。
+	const cyclePattern: Array<[number, number, number]> = [
 		[0.0, 0.35, 880],
 		[0.35, 0.35, 1100],
 		[0.7, 0.35, 880],
@@ -28,39 +32,63 @@ const playLoudAlarmSound = (volume = 0.5) => {
 		[1.75, 0.35, 1100],
 		[2.1, 0.35, 880],
 		[2.45, 0.35, 1100],
-		[2.8, 0.35, 880],
-		[3.15, 0.35, 1100],
 	];
+	const cycleDuration = 2.8;
 
-	for (const [startTime, duration, freq] of pattern) {
-		const oscillator = audioContext.createOscillator();
-		const gainNode = audioContext.createGain();
+	let stopped = false;
+	const activeOscillators: OscillatorNode[] = [];
 
-		oscillator.connect(gainNode);
-		gainNode.connect(audioContext.destination);
+	const scheduleCycle = (baseTime: number) => {
+		for (const [startOffset, duration, freq] of cyclePattern) {
+			const oscillator = audioContext.createOscillator();
+			const gainNode = audioContext.createGain();
 
-		oscillator.frequency.value = freq;
-		oscillator.type = "square";
+			oscillator.connect(gainNode);
+			gainNode.connect(audioContext.destination);
 
-		const fadeIn = 0.005;
-		const fadeOut = 0.02;
-		gainNode.gain.setValueAtTime(0, audioContext.currentTime + startTime);
-		gainNode.gain.linearRampToValueAtTime(
-			loudVolume,
-			audioContext.currentTime + startTime + fadeIn,
-		);
-		gainNode.gain.linearRampToValueAtTime(
-			loudVolume,
-			audioContext.currentTime + startTime + duration - fadeOut,
-		);
-		gainNode.gain.linearRampToValueAtTime(
-			0,
-			audioContext.currentTime + startTime + duration,
-		);
+			oscillator.frequency.value = freq;
+			oscillator.type = "square";
 
-		oscillator.start(audioContext.currentTime + startTime);
-		oscillator.stop(audioContext.currentTime + startTime + duration);
-	}
+			const startAt = baseTime + startOffset;
+			const fadeIn = 0.005;
+			const fadeOut = 0.02;
+			gainNode.gain.setValueAtTime(0, startAt);
+			gainNode.gain.linearRampToValueAtTime(loudVolume, startAt + fadeIn);
+			gainNode.gain.linearRampToValueAtTime(
+				loudVolume,
+				startAt + duration - fadeOut,
+			);
+			gainNode.gain.linearRampToValueAtTime(0, startAt + duration);
+
+			oscillator.start(startAt);
+			oscillator.stop(startAt + duration);
+			activeOscillators.push(oscillator);
+		}
+	};
+
+	// 最初のサイクルを即時スケジュール
+	scheduleCycle(audioContext.currentTime);
+	// 以降 cycleDuration ごとに次のサイクルを追加
+	const intervalId = setInterval(() => {
+		if (stopped) return;
+		scheduleCycle(audioContext.currentTime);
+	}, cycleDuration * 1000);
+
+	return {
+		stop: () => {
+			if (stopped) return;
+			stopped = true;
+			clearInterval(intervalId);
+			for (const osc of activeOscillators) {
+				try {
+					osc.stop();
+				} catch {
+					// 既に停止済みの場合は無視
+				}
+			}
+			audioContext.close().catch(() => {});
+		},
+	};
 };
 
 // 通知音を再生する関数（ピーピーピー、ピーピーピーのパターン）
@@ -118,6 +146,46 @@ export const useNotifications = (events: CalendarEvent[]) => {
 		typeof Notification !== "undefined" ? Notification.permission : "default",
 	);
 	const scheduledTimers = useRef<NodeJS.Timeout[]>([]);
+	const [activeAlarm, setActiveAlarm] = useState<{
+		event: CalendarEvent;
+		minutesBefore: number;
+	} | null>(null);
+	const activeAlarmController = useRef<AlarmController | null>(null);
+
+	const dismissAlarm = useCallback(() => {
+		if (activeAlarmController.current) {
+			activeAlarmController.current.stop();
+			activeAlarmController.current = null;
+		}
+		setActiveAlarm(null);
+	}, []);
+
+	// テスト用: 実際のアラーム挙動（うるさい音のループ + モーダル）を試す
+	const triggerTestAlarm = useCallback(() => {
+		if (activeAlarmController.current) {
+			activeAlarmController.current.stop();
+			activeAlarmController.current = null;
+		}
+		if (settings.soundEnabled) {
+			activeAlarmController.current = playLoudAlarmSound(settings.soundVolume);
+		}
+		setActiveAlarm({
+			event: {
+				summary: "（テスト）本日最初の予定",
+				start: new Date(
+					Date.now() + settings.firstEventAlarmMinutes * 60 * 1000,
+				).toISOString(),
+				end: new Date(
+					Date.now() + (settings.firstEventAlarmMinutes + 60) * 60 * 1000,
+				).toISOString(),
+			},
+			minutesBefore: settings.firstEventAlarmMinutes,
+		});
+	}, [
+		settings.soundEnabled,
+		settings.soundVolume,
+		settings.firstEventAlarmMinutes,
+	]);
 
 	useEffect(() => {
 		const savedSettings = localStorage.getItem("notificationSettings");
@@ -226,14 +294,25 @@ export const useNotifications = (events: CalendarEvent[]) => {
 					const timeUntilAlarm = alarmTime.getTime() - now.getTime();
 					if (timeUntilAlarm > 0 && timeUntilAlarm <= 24 * 60 * 60 * 1000) {
 						const timerId = setTimeout(() => {
-							if (settings.soundEnabled) {
-								playLoudAlarmSound(settings.soundVolume);
+							// 既に鳴っているアラームがあれば停止してから新しいものを鳴らす
+							if (activeAlarmController.current) {
+								activeAlarmController.current.stop();
+								activeAlarmController.current = null;
 							}
+							if (settings.soundEnabled) {
+								activeAlarmController.current = playLoudAlarmSound(
+									settings.soundVolume,
+								);
+							}
+							setActiveAlarm({
+								event,
+								minutesBefore: settings.firstEventAlarmMinutes,
+							});
 							new Notification("本日最初の予定のアラーム", {
 								body: `${settings.firstEventAlarmMinutes}分後に本日最初の予定「${event.summary}」が始まります`,
 								icon: "/favicon.ico",
 								tag: `first-event-alarm-${event.start}`,
-								requireInteraction: false,
+								requireInteraction: true,
 							});
 						}, timeUntilAlarm);
 						scheduledTimers.current.push(timerId);
@@ -273,6 +352,10 @@ export const useNotifications = (events: CalendarEvent[]) => {
 		return () => {
 			scheduledTimers.current.forEach((timer) => clearTimeout(timer));
 			scheduledTimers.current = [];
+			if (activeAlarmController.current) {
+				activeAlarmController.current.stop();
+				activeAlarmController.current = null;
+			}
 		};
 	}, [settings, permission, scheduleNotifications]);
 
@@ -282,5 +365,10 @@ export const useNotifications = (events: CalendarEvent[]) => {
 		saveSettings,
 		requestPermission,
 		scheduleNotifications,
+		activeAlarm,
+		dismissAlarm,
+		triggerTestAlarm,
 	};
 };
+
+export { playLoudAlarmSound };
